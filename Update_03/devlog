@@ -1,1 +1,6 @@
 2022-04-16
+
+Todays goal was to creat a simple EnemyBot and Accept random moves from it.
+Right now it is very simple and it doesn't folllow any strategic. 
+The EnemyBot has also the ability to sent random responses for chat.
+A problem that i encountered today was the fact that time.sleep() pauses the entire program. 
