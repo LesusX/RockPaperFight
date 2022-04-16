@@ -106,7 +106,7 @@ def main_menu_x(pl, en):
                             text_input="Scissors", font=get_font(20), base_color="#11FF00", hovering_color="#BCFDB7")
 
         gm = OfflineGame()
-        enemy_bot = enemy_bot.Enemy()
+        en_bot = enemy_bot.Enemy()
 
         SCREEN.blit(MENU_TEXT, MENU_RECT)
 
@@ -122,11 +122,11 @@ def main_menu_x(pl, en):
                 if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
                     return False 
                 if ROCK_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    print(gm.winner_who("Rock", f"{enemy_bot.bot_move()}"))
+                    print(gm.winner_who("Rock", f"{en_bot.bot_move()}"))
                 if PAPER_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    print(gm.winner_who("Paper", f"{enemy_bot.bot_move()}"))
+                    print(gm.winner_who("Paper", f"{en_bot.bot_move()}"))
                 if SCISSORS_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    print(gm.winner_who("Scissors", f"{enemy_bot.bot_move()}"))
+                    print(gm.winner_who("Scissors", f"{en_bot.bot_move()}"))
                 if END_BUTTON.checkForInput(MENU_MOUSE_POS):
                     pygame.quit()
                     sys.exit()
