@@ -2,29 +2,27 @@
 Here is the offline part of the program. 
 While offline, players can play against randomly generated bots and even interact with them. 
 '''
-import time 
 import pygame, sys
-from buttons import BaseButton, Button
-import random 
+from buttons import BaseButton
 from game import OfflineGame
 import enemy_bot
-import threading 
 
+# Basic for starting pygame properly 
 pygame.init()
-
 SCREEN = pygame.display.set_mode((1200, 720))
 pygame.display.set_caption("Menu")
 font = pygame.font.Font("assets/font.ttf", 17)
 
-
+# Use PosX, posY to set the position of the chosen champions name 
 posX = 5
 posY = 700
 
+# Show the name of the players chosen champion 
 def show_champ(x,y, name):
     x_name = font.render("Your champion:" + str(name), True, (255, 255, 255))
     SCREEN.blit(x_name, (x,y))
 
-
+# Get the font that will be used for all text in the game 
 def get_font(size): # Returns Press-Start-2P in the desired size
     return pygame.font.Font("assets/font.ttf", size)
 
@@ -77,8 +75,10 @@ def redraw_win(SCREEN, BG, player, enemy, BOX, BOX_B, dev_box, time, MENU_TEXT, 
     if game_obj.both_played():
         print(f"You: {game_obj.player_move[0]}, Enemy: {game_obj.enemy_move[0]}!")
         print(game_obj.winner_who(game_obj.player_move[0], game_obj.enemy_move[0]))
+        print("\n\n\nAnimation is playing now\n\n\n") # TODO: Fix the fighting animation and set it here depending on who won the round
         game_obj.reset_moves()
-    
+
+
 '''
 the local assignment should be declared before we call the actuall fuck what on eaeth am I evn writting sa
 I have no gain in mainstream media 
@@ -90,12 +90,13 @@ def main_menu_x(pl):
     en_bot = enemy_bot.Enemy()
     colour = en_bot.bot_color()
     en_bot_name = en_bot.name
-    game_obj = OfflineGame()
+    game_obj = OfflineGame("MAARK", "STEVEEN")  
     
     # Time variables 
     clock = pygame.time.Clock()
     start_ticks = pygame.time.get_ticks() #starter tick
     minutes_played = 0 
+    limit = 10 
 
     # Objects that will be shown on the screen 
     enemy = pygame.transform.scale(pygame.image.load(f"assets/{colour}_pic.png").convert(), (150,220))
@@ -110,24 +111,27 @@ def main_menu_x(pl):
     MENU_TEXT = get_font(50).render(f"Player  vs  {en_bot_name}", True, "#FFFFFF")
     MENU_RECT = MENU_TEXT.get_rect(center=(600, 50))
 
+
     while run:
         clock.tick(60)
 
         # Time related variables 
         seconds = int((pygame.time.get_ticks()-start_ticks)/1000) #calculate how many seconds
         time = font.render("Time: " + str(f"{minutes_played}:{seconds}"), True, (255, 255, 255))
+
+        # Every 60 seconds add 1 minute on the timer and restart the pygame timer to count again all seconds from 0-60 
         if seconds == 60:
             start_ticks = pygame.time.get_ticks()
             minutes_played += 1
 
-        if seconds % 5 == 0 and not game_obj.is_locked:
-            x = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
-            print(random.choice(x))
-            game_obj.lock_timer(is_locked=True)
-        if seconds % 5 != 0 and game_obj.is_locked:
-            game_obj.lock_timer(is_locked=False)
+        # Every x seconds let the enemy say something to the player 
+        if seconds % 5 == 0 and game_obj.can_bot_talk:
+            print(en_bot.bot_chater()) # TODO: Add a text box and print the reply there- 
+            game_obj.lock_timer(can_bot_talk=False)
+        if seconds % 5 != 0 and not game_obj.can_bot_talk:
+            game_obj.lock_timer(can_bot_talk=True)
 
-
+        # For better organisation place here things tha must be rendered on the screen 
         redraw_win(SCREEN, BG, player, enemy, BOX, BOX_B, dev_box, time, MENU_TEXT, MENU_RECT, game_obj)
         show_champ(posX, posY, pl)
 
@@ -148,6 +152,7 @@ def main_menu_x(pl):
         LOCK_BUTTON = BaseButton(image=None, pos=(400, 560), 
                             text_input="LOCK MOVE", font=get_font(20), base_color="#11FF00", hovering_color="#BCFDB7")
            
+        # Get a hold of all available buttons and render them 
         for button in [QUIT_GAME_BUTTON, END_BUTTON, ROCK_BUTTON, PAPER_BUTTON, SCISSORS_BUTTON, LOCK_BUTTON]:
             button.changeColor(MENU_MOUSE_POS)
             button.update(SCREEN)
@@ -160,25 +165,24 @@ def main_menu_x(pl):
                 if QUIT_GAME_BUTTON.checkForInput(MENU_MOUSE_POS):
                     return False 
 
-
+                # Let the player click the button and save the move of the button on a temporary list 
+                # If later on the player clicks lock save the temporary move as permanent for the round  
                 if ROCK_BUTTON.checkForInput(MENU_MOUSE_POS) and not game_obj.player_played:
-                    game_obj.set_player_movement("Rock", False)
-                    # print(f"{game_obj.temporary_move[0]} clicked!")
+                    game_obj.set_player_movement("Rock", False)  # Call the game function responsible for the 
+                                                                 # players movements and register´temporary move. 
 
                 if PAPER_BUTTON.checkForInput(MENU_MOUSE_POS) and not game_obj.player_played:
                     game_obj.set_player_movement("Paper", False)
-                    # print(f"{game_obj.temporary_move[0]} clicked!")
 
                 if SCISSORS_BUTTON.checkForInput(MENU_MOUSE_POS) and not game_obj.player_played:
                     game_obj.set_player_movement("Scissors", False)
-                    # print(f"{game_obj.temporary_move[0]} clicked!")
 
-
+                # if Player clicks on lock button for the first time. Save the selected move from above and tell the game that the player chose a move 
                 if LOCK_BUTTON.checkForInput(MENU_MOUSE_POS) and game_obj.temporary_move and (game_obj.player_played == False):
-                    game_obj.set_player_movement(game_obj.temporary_move[0], True)
-                    game_obj.get_enemy_move(enemy_played=True)
-                    # print(f"You just picked: {game_obj.player_move[0]}")
-                
+                    game_obj.set_player_movement(game_obj.temporary_move[0], True) # Call game function and save players move for the round 
+                    game_obj.get_enemy_move(en_bot.set_bot_move(), enemy_played=True) # Call enemy_bot and ask it for a random move 
+
+                # If Player has a locked move and clicks then say "You chose a move "
                 if LOCK_BUTTON.checkForInput(MENU_MOUSE_POS) and (game_obj.player_played == True):
                     pass # TODO: for 1-3 seconds print on screen that move is locked
                     # print(f"You already picked: {game_obj.player_move[0]}")
