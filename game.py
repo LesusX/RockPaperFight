@@ -59,27 +59,31 @@ class Game:
         self.p2Went = False
 
 
-class OfflineGame: 
-    def __init__(self):
-        self.is_locked = False 
-        self.player_played = False
-        self.enemy_played = False 
-        self.player_move = []
-        self.enemy_move = []
-        self.moves = [None, None]
-        self.player_name = [] 
-        self.enemy_name = []
-        self.temporary_move = []
-        self.winner = " "
 
-    def get_enemy_move(self, enemy_played=False):
+'''
+Offline game handles the moves of the player and the enmy bot. 
+At the same time it handles the show of basic inforamtion and the chat between Player and bot. 
+'''
+class OfflineGame: 
+    def __init__(self, player_name, enemy_name):
+        self.can_bot_talk = False
+        self.player_name = player_name  
+        self.player_played = False
+        self.player_move = []
+        self.enemy_name = enemy_name
+        self.enemy_played = False 
+        self.enemy_move = []
+        self.temporary_move = []
+        self.waiting = False  
+        self.winner = [] 
+
+    def get_enemy_move(self,enemy_input, enemy_played=False):
         self.enemy_played = enemy_played
-        moves = ["Rock", "Paper", "Scissors"]
         if self.enemy_played:
             self.enemy_move.clear()
-            self.enemy_move.append(random.choice(moves))       
+            self.enemy_move.append(enemy_input)       
             self.enemy_played == True 
-
+            
     def set_player_movement(self, TOF, player_played=False):
         self.player_played = player_played
         if self.player_played:
@@ -95,23 +99,33 @@ class OfflineGame:
         elif not self.player_played or not self.enemy_played:
             return False 
 
+    def wait_for_enemy(self):
+        self.waiting = True 
+        return self.waiting 
+
+    # Based on the input from both Player and Enemy find out who is the winner and return the result 
     def winner_who(self, pl, en):
+        self.winner.clear() 
         if (pl == "Rock" and en == "Scissors") or (pl == "Paper" and en == "Rock") or (pl == "Scissors" and en == "Paper"):
-            return str("WIN")
-            # return str(f"WIN! You picked {pl}. Bot picked {en}")
+            self.winner.append(pl) 
+            return str(f"{self.player_name}")
+            # return str("WIN")
         elif (pl == "Paper" and en == "Scissors") or (pl == "Rock" and en == "Paper") or (pl == "Scissors" and en == "Rock"):
-            return str("DEFEAT")
-            # return str(f"DEFEAT! You picked {pl}. Bot picked {en}")
+            self.winner.append(en) 
+            return str(f"{self.enemy_name}")
+            # return str("DEFEAT")
         else:
             return str(f"TIE")
 
-    def lock_timer(self, is_locked=False):
-        self.is_locked = is_locked
-        if self.is_locked:
-            self.is_locked = True  
-        elif not self.is_locked:
-            self.is_locked = False 
-            
+    # This function allows the enemy bot to speak based on the timer on the Offlne_game.py 
+    def lock_timer(self, can_bot_talk=False):
+        self.can_bot_talk = can_bot_talk
+        if self.can_bot_talk:
+            self.can_bot_talk = True  
+        elif not self.can_bot_talk:
+            self.can_bot_talk = False 
+
+    # Reset the moves of both players so that the second round can start 
     def reset_moves(self):
         self.player_played = False
         self.enemy_played = False 
