@@ -90,9 +90,8 @@ def main_menu_x(pl):
     # Create the Enemy Bot 
     en_bot = enemy_bot.Enemy()
     q = en_bot.pick_champion() 
-    colour = en_bot.bot_color()
     en_bot_name = en_bot.name
-    game_obj = OfflineGame("MARTHA", "ROGER")  
+    game_obj = OfflineGame("MARTHA", f"{en_bot_name}")  
 
 
     # Champions objects 
@@ -109,13 +108,12 @@ def main_menu_x(pl):
     minutes_played = 0 
 
     # Objects that will be shown on the screen 
-    enemy = pygame.transform.scale(pygame.image.load(f"assets/{colour}_pic.png").convert(), (150,220))
+    enemy = pygame.transform.scale(pygame.image.load(f"assets/{een.color}_pic.png").convert(), (150,220))
     player = pygame.transform.scale(pygame.image.load("assets/blue_pic.png").convert(), (150,220))
     dev_box = pygame.transform.scale(pygame.image.load("assets/black_pic.png").convert(), (190,110))
     BG = pygame.transform.scale(pygame.image.load("assets/pixel_forest.png").convert(), (1200, 720))
     BOX = pygame.transform.scale(pygame.image.load("assets/input_box.png").convert(), (450, 220))
     BOX_B = pygame.transform.scale(pygame.image.load("assets/input_box.png").convert(), (600, 220))    
-    enemy = pygame.transform.scale(pygame.image.load(f"assets/{colour}_pic.png").convert(), (150,220))
     player = pygame.transform.scale(pygame.image.load("assets/blue_pic.png").convert(), (150,220))
     dev_box = pygame.transform.scale(pygame.image.load("assets/black_pic.png").convert(), (190,110))
     MENU_TEXT = get_font(50).render(f"{ppl.name}  vs  {een.name}", True, "#FFFFFF")
