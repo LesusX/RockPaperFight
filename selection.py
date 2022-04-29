@@ -1,10 +1,6 @@
-from pickle import NONE
-from re import A
-from tkinter.ttk import Menubutton 
 import pygame, sys
 from buttons import * 
-import random 
-
+from champions import * 
 '''
 The selection screen allows players to see a table with all available champions and their powers.
 From there players pick a champion that will represent them in the batlle.
@@ -13,16 +9,18 @@ pygame.init()
 SCREEN = pygame.display.set_mode((1200, 720))
 pygame.display.set_caption("Champion Selection")
 
-white = (255, 255, 255)
-posX = 10
-posY = 680
 
-BG = pygame.transform.scale(pygame.image.load("assets/purple_background.png").convert(), (1400, 790))
-sel_rect_a = pygame.image.load("assets/select_rect.png")
-sel_rect_b = pygame.image.load("assets/select_rect.png")
-sel_rect_c = pygame.image.load("assets/select_rect.png")
-font = pygame.font.Font("assets/font.ttf", 35)
-sel = pygame.image.load("assets/selector.png").convert()
+class ChampionSelector:
+    def __init__(self):
+        self.selected_champion = []
+        self.is_locked = False 
+        
+
+    def champion_selection(self, clicked_champion):
+        self.selected_champion.clear()
+        self.selected_champion.append(clicked_champion)
+        return self.selected_champion[0]
+
 
 
 def show_champ(x,y, name):
@@ -34,10 +32,24 @@ def get_font(size): # Returns Press-Start-2P in the desired size
     return pygame.font.Font("assets/font.ttf", size)
 
 
+
+white = (255, 255, 255)
+posX = 10
+posY = 680
+
+BG = pygame.transform.scale(pygame.image.load("assets/purple_background.png").convert(), (1400, 790))
+sel_rect_a = pygame.image.load("assets/select_rect.png")
+sel_rect_b = pygame.image.load("assets/select_rect.png")
+sel_rect_c = pygame.image.load("assets/select_rect.png")
+font = pygame.font.Font("assets/font.ttf", 35)
+sel = pygame.image.load("assets/selector.png").convert()
+champ_selector = ChampionSelector()
+
+
+
 def selector():
     run = True 
     name = " "  
-    selected_champion = []
     while run:
         SCREEN.blit(BG, (0, 0))
         SCREEN.blit(sel, (150, 80))
@@ -71,37 +83,27 @@ def selector():
             button.changeColor(MENU_MOUSE_POS)
             button.update(SCREEN)
 
-    # TODO: add: if Play button pressed and chosen_champion != None continue else tell player to pick a champion 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if CHAMPION_A.checkForInput(MENU_MOUSE_POS):
-                    chosen_champion = "A"
-                    selected_champion.clear() 
-                    selected_champion.append(chosen_champion)
-                    print(selected_champion[0])
+                    # On the parameter set the name of the cliced champions sublcass 
+                    champ_selector.champion_selection(MeleeChampionOne)
 
                 if CHAMPION_B.checkForInput(MENU_MOUSE_POS):
-                    chosen_champion = "B"
-                    selected_champion.clear() 
-                    selected_champion.append(chosen_champion)
-                    print(selected_champion[0])
+                    champ_selector.champion_selection(MeleeChampionTwo)
 
                 if CHAMPION_C.checkForInput(MENU_MOUSE_POS):
-                    chosen_champion = "C"
-                    selected_champion.clear() 
-                    selected_champion.append(chosen_champion)
-                    print(selected_champion[0])
+                    champ_selector.champion_selection(RangeChampionOne)
 
-                if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS) and not selected_champion:
+                if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS) and not champ_selector.selected_champion:
                     print("You must choose a champion to play!")
                 
-                if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS) and selected_champion:
-                    print("List is full you can play!")
+                if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS) and champ_selector.selected_champion:
                     run = False 
-                    return selected_champion[0]
+                    return champ_selector.selected_champion[0]
                 
                 if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
                     pygame.quit()
