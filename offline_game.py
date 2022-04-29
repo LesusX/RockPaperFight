@@ -75,7 +75,8 @@ def redraw_win(SCREEN, BG, player, enemy, BOX, BOX_B, dev_box, time, MENU_TEXT, 
     if game_obj.both_played():
         print(f"You: {game_obj.player_move[0]}, Enemy: {game_obj.enemy_move[0]}!")
         print(game_obj.winner_who(game_obj.player_move[0], game_obj.enemy_move[0]))
-        print("\n\n\nAnimation is playing now\n\n\n") # TODO: Fix the fighting animation and set it here depending on who won the round
+        print("\n\n\nAnimation is playing now\n\n\n") 
+        # TODO: Fix the fighting animation and set it here depending on who won the round
         game_obj.reset_moves()
 
 
@@ -88,15 +89,24 @@ def main_menu_x(pl):
     run = True
     # Create the Enemy Bot 
     en_bot = enemy_bot.Enemy()
+    q = en_bot.pick_champion() 
     colour = en_bot.bot_color()
     en_bot_name = en_bot.name
-    game_obj = OfflineGame("MAARK", "STEVEEN")  
+    game_obj = OfflineGame("MARTHA", "ROGER")  
+
+
+    # Champions objects 
+    # Get the name of the selected champions subcless and create an object to be used on this game.
+    ppl = pl() 
+    een = q()
+    # TODO: Create the enemy from the other file and bring it here.
+    # cut lines in half 
+    print(f" The enemy  picked: {een.name}\nYou picked {ppl.name}")
     
     # Time variables 
     clock = pygame.time.Clock()
-    start_ticks = pygame.time.get_ticks() #starter tick
+    start_ticks = pygame.time.get_ticks() # Let pygame count the ticks for time 
     minutes_played = 0 
-    limit = 10 
 
     # Objects that will be shown on the screen 
     enemy = pygame.transform.scale(pygame.image.load(f"assets/{colour}_pic.png").convert(), (150,220))
@@ -108,7 +118,7 @@ def main_menu_x(pl):
     enemy = pygame.transform.scale(pygame.image.load(f"assets/{colour}_pic.png").convert(), (150,220))
     player = pygame.transform.scale(pygame.image.load("assets/blue_pic.png").convert(), (150,220))
     dev_box = pygame.transform.scale(pygame.image.load("assets/black_pic.png").convert(), (190,110))
-    MENU_TEXT = get_font(50).render(f"Player  vs  {en_bot_name}", True, "#FFFFFF")
+    MENU_TEXT = get_font(50).render(f"{ppl.name}  vs  {een.name}", True, "#FFFFFF")
     MENU_RECT = MENU_TEXT.get_rect(center=(600, 50))
 
 
@@ -133,7 +143,7 @@ def main_menu_x(pl):
 
         # For better organisation place here things tha must be rendered on the screen 
         redraw_win(SCREEN, BG, player, enemy, BOX, BOX_B, dev_box, time, MENU_TEXT, MENU_RECT, game_obj)
-        show_champ(posX, posY, pl)
+        show_champ(posX, posY, ppl.name)
 
         MENU_MOUSE_POS = pygame.mouse.get_pos()
 
