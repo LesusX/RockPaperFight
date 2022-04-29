@@ -4,13 +4,22 @@ Although simple it can be expanded so it becomes smarter and more responsive to 
 An AI can be created if time permits it. 
 '''
 import random
-import time 
+from winreg import EnableReflectionKey
 
-class Enemy: 
+from champions import * 
+class Enemy:  
     def __init__(self):
         names = ["Mark", "John", "Steven", "Roger", "Joseph", "JOJO"]
         self.name = random.choice(names)
         self.bot_move = []
+        self.enemy_champion = []
+
+    # Pick a random sublcass that represents a champion and return it to the offline_game.py to create an object 
+    def pick_champion(self):
+        champions = [MeleeChampionOne, MeleeChampionTwo, RangeChampionOne]
+        self.enemy_champion.clear()
+        self.enemy_champion.append(random.choice(champions))
+        return self.enemy_champion[0]
 
     def set_bot_move(self):
         moves = ["Rock", "Paper", "Scissors"]
