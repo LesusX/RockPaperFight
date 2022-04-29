@@ -66,5 +66,5 @@ class RangeChampionOne(Champion):
         self.name = "Septimius Severus" 
         self.information = "Info about: Septimius Severus"
         self.type = "Air"
-        self.color = "Orange"
+        self.color = "orange"
 
