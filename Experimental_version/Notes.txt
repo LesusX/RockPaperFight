@@ -1,0 +1,25 @@
+# TODO: 
+Add attack, Defend, powerup buttons 
+Add functionality on the above buttons 
+Randomize the arena and add bonus effects 
+Add all of the above to online mode 
+
+
+# Todo Later:
+
+Add text input 
+Add chat functionality 
+Add loading screen 
+Add API for loading screen 
+Add animated background 
+
+
+# Polish 
+Animations and characters 
+Animated Arena 
+Animated menu and selection screen 
+Prepare to upload server on heroku 
+
+# Before wrapping up 
+Save normal project and then convert a copy to an ex.file 
+Test the game 
