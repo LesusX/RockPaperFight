@@ -61,16 +61,16 @@ def selector():
         MENU_TEXT = get_font(40).render("Select your champion", True, "#ffffff")
         MENU_RECT = MENU_TEXT.get_rect(center=(575, 40))
 
-        CHAMPION_A = BaseButton(image=pygame.image.load("assets/select_rect.png").convert(), pos=(270, 170), 
+        CHAMPION_A = BaseButton(image=pygame.transform.scale(pygame.image.load("assets/Caesar.png").convert_alpha(), (120,120)), pos=(270, 170), 
                             text_input=" ", font=get_font(60), base_color="#d7fcd4", hovering_color="White")
         
-        CHAMPION_B = BaseButton(image=pygame.image.load("assets/select_rect.png").convert(), pos=(500, 170), 
-                            text_input=" ", font=get_font(60), base_color="#d7fcd4", hovering_color="White")
+        CHAMPION_B = BaseButton(image=pygame.transform.scale(pygame.image.load("assets/aurelius.png").convert_alpha(), (120, 120)), pos=(500, 170), 
+                            text_input=" ", font=get_font(20), base_color="#d7fcd4", hovering_color="White")
         
-        CHAMPION_C = BaseButton(image=pygame.image.load("assets/select_rect.png").convert(), pos=(722, 170), 
+        CHAMPION_C = BaseButton(image=pygame.transform.scale(pygame.image.load("assets/Septimius.png").convert_alpha(), (120,120)), pos=(722, 170), 
                             text_input=" ", font=get_font(55), base_color="#d7fcd4", hovering_color="White")
 
-        PLAY_BUTTON = BaseButton(image=None, pos=(1100, 630), 
+        PLAY_BUTTON = BaseButton(image=None, pos=(1100, 630),  
                             text_input="PLAY", font=get_font(40), base_color="#d7fcd4", hovering_color="White")
         
         QUIT_BUTTON = BaseButton(image=None, pos=(1100, 680), 
@@ -79,7 +79,7 @@ def selector():
         SCREEN.blit(MENU_TEXT, MENU_RECT)
 
 
-        for button in [PLAY_BUTTON, QUIT_BUTTON]:
+        for button in [PLAY_BUTTON, QUIT_BUTTON, CHAMPION_A, CHAMPION_B, CHAMPION_C]:
             button.changeColor(MENU_MOUSE_POS)
             button.update(SCREEN)
 
