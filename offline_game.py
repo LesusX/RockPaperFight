@@ -71,7 +71,13 @@ def redraw_win(SCREEN, BG, BOX, BOX_B, dev_box, time, MENU_TEXT, MENU_RECT, movi
 	moving_sprites.draw(SCREEN)
 
 
+def fps():
+    fr = "V.3 Fps: " + str(int(clock.get_fps()))
+    frt = font.render(fr, 1, pygame.Color("white"))
+    return frt
+
 def main_menu_x(pl):
+	global clock
 	# Create the Enemy Bot 
 	en_bot = enemy_bot.Enemy()
 	q = en_bot.pick_champion() 
@@ -110,7 +116,7 @@ def main_menu_x(pl):
 	een.start_idle()
 	while run:
 		clock.tick(60)  
-		
+
 		# Time related variables 
 		seconds = int((pygame.time.get_ticks()-start_ticks)/1000) #calculate how many seconds
 		time = font.render("Time: " + str(f"{minutes_played}:{seconds}"), True, (255, 255, 255))
@@ -191,11 +197,11 @@ def main_menu_x(pl):
 				if game_obj.both_played():
 					outcome = game_obj.winner_who(game_obj.player_move[0], game_obj.enemy_move[0])
 					if outcome == game_obj.player_name:
-						ppl.start_attack() # Start the animation for attack 
+						ppl.start_running() # Start the animation for attack 
 						een.health -= 15
 						# print(f"Enemy champion is: {een.health}")
 					elif outcome == game_obj.enemy_name:
-						een.start_attack() # Start the animation for attack 
+						een.start_running() # Start the animation for attack 
 						ppl.health -= 15
 						# print(f"Your champions health is: {ppl.health}")
 					else:
@@ -209,6 +215,7 @@ def main_menu_x(pl):
 		if ppl.health <= 0:
 			return False
 
+		SCREEN.blit(fps(), (550, 700))
 		# Keep update in the end so there are no speed gliches 
 		ppl.update()
 		een.update()
