@@ -6,12 +6,14 @@ import pygame, sys
 from buttons import BaseButton
 from game import OfflineGame
 import enemy_bot
+from loading_screen import * 
 
 # Basic for starting pygame properly 
 pygame.init()
 SCREEN = pygame.display.set_mode((1200, 720))
 pygame.display.set_caption("Menu")
 font = pygame.font.Font("assets/font.ttf", 17)
+
 
 # Use PosX, posY to set the position of the chosen champions name 
 posX = 5
@@ -72,9 +74,9 @@ def redraw_win(SCREEN, BG, BOX, BOX_B, dev_box, time, MENU_TEXT, MENU_RECT, movi
 
 
 def fps():
-    fr = "V.3 Fps: " + str(int(clock.get_fps()))
-    frt = font.render(fr, 1, pygame.Color("white"))
-    return frt
+	fr = "V.3 Fps: " + str(int(clock.get_fps()))
+	frt = font.render(fr, 1, pygame.Color("white"))
+	return frt
 
 def main_menu_x(pl):
 	global clock
@@ -197,25 +199,43 @@ def main_menu_x(pl):
 				if game_obj.both_played():
 					outcome = game_obj.winner_who(game_obj.player_move[0], game_obj.enemy_move[0])
 					if outcome == game_obj.player_name:
+						game_obj.pla_att_anim()
+						moving_sprites.remove(ppl, een) 
+						moving_sprites.add(een, ppl)  
 						ppl.start_running() # Start the animation for attack 
-						een.health -= 15
 						# print(f"Enemy champion is: {een.health}")
 					elif outcome == game_obj.enemy_name:
+						game_obj.pla_att_anim()
+						moving_sprites.remove(een, ppl) 
+						moving_sprites.add(ppl, een)  
 						een.start_running() # Start the animation for attack 
-						ppl.health -= 15
 						# print(f"Your champions health is: {ppl.health}")
 					else:
 						print("Tie!")
 					game_obj.reset_moves()
+		
+		if game_obj.attack_anim and ppl.rect.center[0] >= 880:
+			print("Colided with enemy")				
+			een.health -= 12 
+			een.get_damage(120)
+			game_obj.sto_att_anim()
 
-
+		if game_obj.attack_anim and een.rect.center[0] <= 240:
+			print("Colided with player")							
+			ppl.health -= 12
+			ppl.get_damage(120)
+			game_obj.sto_att_anim()
 
 		if een.health <= 0: 
+			start_loading_screen()
 			return False
+		
 		if ppl.health <= 0:
+			start_loading_screen()
 			return False
 
 		SCREEN.blit(fps(), (550, 700))
+
 		# Keep update in the end so there are no speed gliches 
 		ppl.update()
 		een.update()
