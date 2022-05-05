@@ -1,13 +1,58 @@
 import pygame 
+screen = pygame.display.set_mode((1200,720))
 
-class Champion:
+class Champion(pygame.sprite.Sprite):
 	def __init__(self):
+		super().__init__()
+		# Champion parameters 
 		self.max_health = 100 
 		self.health = 100 
 		self.attack_damage = 10
 		self.attack = False 
 		self.heal = False 
 		self.power_up = False 
+		# Healthbar parameters 
+		self.current_health = 1000
+		self.target_health = 1000 
+		self.max_health = 1000
+		self.health_bar_length = 300
+		self.health_ratio = self.max_health / self.health_bar_length
+		self.health_change_speed = 5
+
+	def get_damage(self,amount):
+		if self.target_health > 0:
+			self.target_health -= amount
+		if self.target_health < 0:
+			self.target_health = 0
+
+	def get_health(self,amount):
+		if self.target_health < self.max_health:
+			self.target_health += amount
+		if self.target_health > self.max_health:
+			self.target_health = self.max_health
+
+	def advanced_health(self):
+		transition_width = 0
+		transition_color = (255,0,0)
+
+		if self.current_health < self.target_health:
+			self.current_health += self.health_change_speed
+			transition_width = int((self.target_health - self.current_health) / self.health_ratio)
+			transition_color = (0,255,0)
+
+		if self.current_health > self.target_health:
+			self.current_health -= self.health_change_speed 
+			transition_width = int((self.target_health - self.current_health) / self.health_ratio)
+			transition_color = (255,255,0)
+
+		health_bar_width = int(self.current_health / self.health_ratio)
+		health_bar = pygame.Rect(800,70,health_bar_width,25)
+		transition_bar = pygame.Rect(health_bar.right,45,transition_width,25)
+		
+		pygame.draw.rect(screen,(255,0,0),health_bar)
+		pygame.draw.rect(screen,transition_color,transition_bar)	
+		pygame.draw.rect(screen,(255,255,255),(800,70,self.health_bar_length,25),4)	
+
 
 	def __str__(self) :
 		return self.name
@@ -48,6 +93,7 @@ class Champion:
 
 
 class EnemyMeleeChampionOne(Champion, pygame.sprite.Sprite):
+
 	def __init__(self):
 		Champion.__init__(self)
 		pygame.sprite.Sprite.__init__(self)
@@ -86,6 +132,7 @@ class EnemyMeleeChampionOne(Champion, pygame.sprite.Sprite):
 		self.image = self.run_left_sprites[self.current_sprite]
 		self.rect = self.image.get_rect()
 		self.rect.center = [950,360] # Fixed position of player 
+		self.moving = pygame.Rect(180,355,400,450)
 
 		self.vel = 6
 		self.neg_vel = -7 
@@ -104,6 +151,8 @@ class EnemyMeleeChampionOne(Champion, pygame.sprite.Sprite):
 		self.neg_vel = -7 
 
 	def update(self):
+		self.advanced_health()
+
 		if self.run_right_animation:
 			self.reset_neg_vel()
 			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
@@ -118,7 +167,7 @@ class EnemyMeleeChampionOne(Champion, pygame.sprite.Sprite):
 
 
 		if self.attack_animation:
-			self.current_sprite += 0.088 
+			self.current_sprite += 0.08 
 			if int(self.current_sprite) >= len(self.attack_right_sprites):
 				self.current_sprite = 0
 				self.attack_animation = False 
@@ -144,3 +193,5 @@ class EnemyMeleeChampionOne(Champion, pygame.sprite.Sprite):
 				self.current_sprite = 0
 
 			self.image = self.idle_right_sprites[int(self.current_sprite)]
+
+
