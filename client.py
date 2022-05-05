@@ -1,12 +1,10 @@
 import os, sys 
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (170,55)  # Set the starting position of the window. 
-import pygame
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (150, 60)  # Set the starting position of the window. 
+import pygame 
 from network import Network
-import pickle
 from buttons import * 
 import offline_game 
 from selection import *
-import time , random 
 
 # Initialise pygame and font 
 pygame.init()
@@ -14,7 +12,7 @@ pygame.font.init()
 
 # ---------------------------------Set game constants----------------------------
 width = 1200
-height = 720
+height = 720 
 win = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Client")
 
@@ -100,7 +98,6 @@ def main():
 
         if game.bothWent():
             redrawWindow(win, game, player, BG, BOX, BOX_B)
-            pygame.time.delay(500)
             try:
                 game = n.send("reset")
             except:
@@ -143,7 +140,7 @@ def main():
 def play_online_win():  # TODO: delete this in the end 
     run = True
     clock = pygame.time.Clock()
-
+    
     while run:
         clock.tick(60)
         win.fill((128, 128, 128))
@@ -164,7 +161,7 @@ def play_online_win():  # TODO: delete this in the end
 
 def play_offline():   # TODO: Take this out once the select champion screen is completed 
     run = True 
-    x = " "
+    x = ""
     while run:
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
@@ -206,7 +203,7 @@ def play_offline():   # TODO: Take this out once the select champion screen is c
                     return False
         pygame.display.update()
 
-    offline_game.main_menu_x(x)
+    offline_game.main_menu_x(x) 
 
 # Options allow the player to increase or decrease the games volume. 
 def options():
