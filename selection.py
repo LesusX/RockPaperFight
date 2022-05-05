@@ -1,6 +1,8 @@
 import pygame, sys
 from buttons import * 
 from champions import * 
+from loading_screen import * 
+
 '''
 The selection screen allows players to see a table with all available champions and their powers.
 From there players pick a champion that will represent them in the batlle.
@@ -8,7 +10,6 @@ From there players pick a champion that will represent them in the batlle.
 pygame.init()
 SCREEN = pygame.display.set_mode((1200, 720))
 pygame.display.set_caption("Champion Selection")
-
 
 class ChampionSelector:
     def __init__(self):
@@ -38,9 +39,6 @@ posX = 10
 posY = 680
 
 BG = pygame.transform.scale(pygame.image.load("assets/purple_background.png").convert(), (1400, 790))
-sel_rect_a = pygame.image.load("assets/select_rect.png")
-sel_rect_b = pygame.image.load("assets/select_rect.png")
-sel_rect_c = pygame.image.load("assets/select_rect.png")
 font = pygame.font.Font("assets/font.ttf", 35)
 sel = pygame.image.load("assets/selector.png").convert()
 champ_selector = ChampionSelector()
@@ -53,9 +51,6 @@ def selector():
     while run:
         SCREEN.blit(BG, (0, 0))
         SCREEN.blit(sel, (150, 80))
-        SCREEN.blit(sel_rect_a, (180, 120))
-        SCREEN.blit(sel_rect_b, (425, 120))
-        SCREEN.blit(sel_rect_c, (640, 120))
         MENU_MOUSE_POS = pygame.mouse.get_pos()
 
         MENU_TEXT = get_font(40).render("Select your champion", True, "#ffffff")
@@ -70,6 +65,9 @@ def selector():
         CHAMPION_C = BaseButton(image=pygame.transform.scale(pygame.image.load("assets/Septimius.png").convert_alpha(), (120,120)), pos=(722, 170), 
                             text_input=" ", font=get_font(55), base_color="#d7fcd4", hovering_color="White")
 
+        CHAMPION_D = BaseButton(image=pygame.transform.scale(pygame.image.load("assets/augustus.png").convert_alpha(), (120,120)), pos=(900, 170), 
+                            text_input=" ", font=get_font(55), base_color="#d7fcd4", hovering_color="White")
+
         PLAY_BUTTON = BaseButton(image=None, pos=(1100, 630),  
                             text_input="PLAY", font=get_font(40), base_color="#d7fcd4", hovering_color="White")
         
@@ -79,7 +77,7 @@ def selector():
         SCREEN.blit(MENU_TEXT, MENU_RECT)
 
 
-        for button in [PLAY_BUTTON, QUIT_BUTTON, CHAMPION_A, CHAMPION_B, CHAMPION_C]:
+        for button in [PLAY_BUTTON, QUIT_BUTTON, CHAMPION_A, CHAMPION_B, CHAMPION_C, CHAMPION_D]:
             button.changeColor(MENU_MOUSE_POS)
             button.update(SCREEN)
 
@@ -98,10 +96,14 @@ def selector():
                 if CHAMPION_C.checkForInput(MENU_MOUSE_POS):
                     champ_selector.champion_selection(RangeChampionOne)
 
+                if CHAMPION_D.checkForInput(MENU_MOUSE_POS):
+                    champ_selector.champion_selection(MeleeChampionThree)
+
                 if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS) and not champ_selector.selected_champion:
                     print("You must choose a champion to play!")
                 
                 if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS) and champ_selector.selected_champion:
+                    start_loading_screen() 
                     run = False 
                     return champ_selector.selected_champion[0]
                 
