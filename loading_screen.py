@@ -11,7 +11,6 @@ def start_loading_screen():
 	font = pg.font.Font("assets/font.ttf", 17)
 	response = requests.get("https://icanhazdadjoke.com/slack")
 	answer = response.json()
-	LOADING_BG = pg.image.load("Loading Bar Background.png")
 
 	BACKGROUND_COLOR = '#0d0e2e'
 	LIGHT_GRAY = '#ff3300' 
