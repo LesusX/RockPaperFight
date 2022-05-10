@@ -16,4 +16,4 @@ For single player:
 2) Click Play -> Offline Game 
 
 
-All sprites used are taken by itch.io  
+All sprites used within the game are taken from itch.io  
