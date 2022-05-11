@@ -2,8 +2,8 @@ import socket
 from _thread import *
 import pickle
 from game import Game
-                            # Home          # School 
-server = "10.154.196.62"   #"192.168.1.75"  #"10.154.196.89" 
+                     
+server = "IPV4"   
 port = 5556
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -24,14 +24,19 @@ player_champions = ["RangeChampionOne", "MeleeChampionOne", "MeleeChampionTwo", 
 moves = ["Rock", "Paper", "Scissors", "rock", "paper", "scissors", "ROCK", "PAPER", "SCISSORS"]
 data_types = ["reset", "get"]
 
+
+
+
+
 def threaded_client(conn, p, gameId):
     global idCount
     conn.send(str.encode(str(p)))
 
+
     reply = ""
     while True:
         try:
-            data = conn.recv(4096*4).decode()
+            data = conn.recv(4096*6).decode()
 
             if gameId in games:
                 game = games[gameId]
@@ -39,6 +44,20 @@ def threaded_client(conn, p, gameId):
                 if not data:
                     break
                 else:
+                    if p == 0: 
+                        if data.split(" ")[0] == "register":
+                            split_data = data.split(" ")
+                            split_data.pop(0) 
+                            x = ''.join(str(v) for v in split_data)
+                            game.set_champions(p, x)
+
+                    if p == 1: 
+                        if data.split(" ")[0] == "register":
+                            split_data = data.split(" ")
+                            split_data.pop(0) 
+                            x = ''.join(str(v) for v in split_data)
+                            game.set_champions(p, x)
+
                     if data == "reset":
                         game.resetWent()
                     if data != "get" and data in moves:
@@ -61,9 +80,7 @@ def threaded_client(conn, p, gameId):
     except:
         pass
     idCount -= 1
-    conn.close()
-
-
+    conn.close() 
 
 while True:
     conn, addr = s.accept()
@@ -81,4 +98,3 @@ while True:
 
 
     start_new_thread(threaded_client, (conn, p, gameId)) 
-    
