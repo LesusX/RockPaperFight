@@ -27,14 +27,8 @@ def get_font(size): # Returns Press-Start-2P in the desired size
     return pygame.font.Font("assets/font.ttf", size)
 
 
-def redrawWindow(win, game, p, BG, BOX, BOX_B):
+def redrawWindow(win, game, p, BG, BOX, BOX_B, moving_sprites):
     
-    player_zero_champions_as_obj = [MeleeChampionOne, MeleeChampionTwo, MeleeChampionThree, RangeChampionOne]
-    player_zero_champions_as_str = ["<class'champions.MeleeChampionOne'>", "<class'champions.MeleeChampionTwo'>", "<class'champions.MeleeChampionThree'>", "<class'champions.RangeChampionOne'>"]
-    
-    player_one_champions_as_obj = [EnemyMeleeChampionOne, EnemyMeleeChampionTwo]
-    player_one_champions_as_str = ["<class'Enemy_Champions.EnemyMeleeChampionOne'>", "<class'Enemy_Champions.EnemyMeleeChampionTwo'>"]
-
     win.fill((128,128,128))
     
     
@@ -43,30 +37,6 @@ def redrawWindow(win, game, p, BG, BOX, BOX_B):
         text = font.render("Waiting for Player...", 1, (255,0,0), True)
         win.blit(text, (width/2 - text.get_width()/2, height/2 - text.get_height()/2))
     else:
-        
-        if p == 0:
-            current_player = player_zero_champions_as_str.index(''.join(str(v) for v in game.pl_zero))
-            current_player_obj = player_zero_champions_as_obj[current_player]
-            # enemy_player = player_one_champions_as_str.index(''.join(str(v) for v in game.pl_one))
-            # enemy_player_obj = player_one_champions_as_obj[enemy_player]
-            moving_sprites = pygame.sprite.Group()
-        
-            ppl = current_player_obj() 
-            # een = enemy_player_obj() 
-            moving_sprites.add(ppl)
-
-        elif p == 1:
-            current_player = player_one_champions_as_str.index(''.join(str(v) for v in game.pl_one))
-            current_player_obj = player_one_champions_as_obj[current_player]
-
-            moving_sprites = pygame.sprite.Group()
-        
-            ppl = current_player_obj() 
-            # een = enemy_player_obj() 
-            moving_sprites.add(ppl)
-
-        ppl.start_idle()
-        # een.start_idle()
 
          
         # een.update()
@@ -111,13 +81,18 @@ def redrawWindow(win, game, p, BG, BOX, BOX_B):
             btn.draw(win)
         
         moving_sprites.draw(win) 
-        ppl.update()  
     pygame.display.update()
 
 '''
 main is responsible for the online part of the game and 
 '''
 def main():
+    player_zero_champions_as_obj = [MeleeChampionOne, MeleeChampionTwo, MeleeChampionThree, RangeChampionOne]
+    player_zero_champions_as_str = ["<class'champions.MeleeChampionOne'>", "<class'champions.MeleeChampionTwo'>", "<class'champions.MeleeChampionThree'>", "<class'champions.RangeChampionOne'>"]
+    
+    player_one_champions_as_obj = [EnemyMeleeChampionOne, EnemyMeleeChampionTwo]
+    player_one_champions_as_str = ["<class'Enemy_Champions.EnemyMeleeChampionOne'>", "<class'Enemy_Champions.EnemyMeleeChampionTwo'>"]
+
     BG = pygame.transform.scale(pygame.image.load("assets/pixel_forest.png").convert(), (1200, 720))
     BOX = pygame.transform.scale(pygame.image.load("assets/input_box.png").convert(), (450, 220))
     BOX_B = pygame.transform.scale(pygame.image.load("assets/input_box.png").convert(), (600, 220))
@@ -136,6 +111,53 @@ def main():
     data = ("register " + f"{str(x)}")
     n.send(data) 
             
+    '''
+    if player == 0:
+        current_player = player_zero_champions_as_str.index(''.join(str(v) for v in game.pl_zero))
+        current_player_obj = player_zero_champions_as_obj[current_player]
+        # enemy_player = player_one_champions_as_str.index(''.join(str(v) for v in game.pl_one))
+        # enemy_player_obj = player_one_champions_as_obj[enemy_player]
+        moving_sprites = pygame.sprite.Group()
+    
+        ppl = current_player_obj() 
+        # een = enemy_player_obj() 
+        moving_sprites.add(ppl)
+
+    elif player == 1:
+        current_player = player_one_champions_as_str.index(''.join(str(v) for v in game.pl_one))
+        current_player_obj = player_one_champions_as_obj[current_player]
+        ppl = current_player_obj() 
+        # een = enemy_player_obj() 
+        moving_sprites.add(ppl)
+    '''
+    
+    moving_sprites = pygame.sprite.Group()
+        
+    ppl = x() 
+    # een = enemy_player_obj() 
+    moving_sprites.add(ppl)
+
+    loop = True 
+
+    while loop:
+        game = n.send("get") 
+        if player == 0 and game.both_chose():
+            enmy = game.return_pl_one_cha()
+            enemy_player = player_one_champions_as_str.index(''.join(str(v) for v in game.pl_one))
+            enemy_player_obj = player_one_champions_as_obj[enemy_player]
+            een = enemy_player_obj()
+            moving_sprites.add(een)
+            loop = False 
+        if player == 1 and game.both_chose():
+            enmy = game.return_pl_zero_cha()
+            enemy_player = player_zero_champions_as_str.index(''.join(str(v) for v in game.pl_zero))
+            enemy_player_obj = player_zero_champions_as_obj[enemy_player]
+            een = enemy_player_obj()
+            moving_sprites.add(een)
+            loop = False 
+
+    een.start_idle() 
+    ppl.start_idle()
     while run:
         clock.tick(60)
         try:
@@ -145,9 +167,12 @@ def main():
             print("Couldn't get game")
             break
 
+        # TODO: Add function on game that returns if both pllayers are in. 
+        # If yes then try to create a player within the function on the main loop.
+        # It may work....?
 
         if game.bothWent():
-            redrawWindow(win, game, player, BG, BOX, BOX_B)
+            redrawWindow(win, game, player, BG, BOX, BOX_B, moving_sprites)
             try:
                 game = n.send("reset")
             except:
@@ -158,10 +183,12 @@ def main():
             font = pygame.font.SysFont("comicsans", 90)
             if (game.winner() == 1 and player == 1) or (game.winner() == 0 and player == 0):
                 text = font.render("You Won!", 1, (255,0,0))
+                ppl.start_running() 
             elif game.winner() == -1:
                 text = font.render("Tie Game!", 1, (255,0,0))
             else:
                 text = font.render("You Lost...", 1, (255, 0, 0))
+                een.start_running()
 
             win.blit(text, (width/2 - text.get_width()/2, height/2 - text.get_height()/2))
             pygame.display.update()
@@ -185,7 +212,9 @@ def main():
                                 n.send(btn.text)
     
          
-        redrawWindow(win, game, player, BG,  BOX, BOX_B)
+        redrawWindow(win, game, player, BG,  BOX, BOX_B, moving_sprites)
+        ppl.update() 
+        een.update() 
         pygame.display.flip()
         pygame.display.update()
 
