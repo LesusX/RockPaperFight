@@ -1,5 +1,4 @@
 import pygame
-
 screen = pygame.display.set_mode((1200,720))
 
 class Champion:
@@ -49,8 +48,8 @@ class Champion:
 		transition_bar = pygame.Rect(health_bar.right,45,transition_width,25)
 		
 		pygame.draw.rect(screen,(255,0,0),health_bar)
-		pygame.draw.rect(screen,transition_color,transition_bar)	
-		pygame.draw.rect(screen,(255,255,255),(200,70,self.health_bar_length,25),4)	
+		pygame.draw.rect(screen,transition_color,transition_bar)
+		pygame.draw.rect(screen,(255,255,255),(200,70,self.health_bar_length,25),4)
 
 	def __str__(self) :
 		return self.name
