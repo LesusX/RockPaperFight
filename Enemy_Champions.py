@@ -195,3 +195,105 @@ class EnemyMeleeChampionOne(Champion, pygame.sprite.Sprite):
 			self.image = self.idle_right_sprites[int(self.current_sprite)]
 
 
+
+
+class EnemyMeleeChampionTwo(Champion, pygame.sprite.Sprite):
+	def __init__(self):
+		Champion.__init__(self)
+		pygame.sprite.Sprite.__init__(self)
+		self.name = "Julius Caesar" 
+		self.information = "Info about: Julius Caesar"
+		self.type = "Fire"
+		self.color = "blue"
+
+
+		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_left_1.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_left_2.png").convert_alpha(), (250,260 )),
+		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_left_3.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_left_4.png").convert_alpha(), (250,260 )), 
+		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_left_5.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_left_6.png").convert_alpha(), (250,260 ))]
+
+		self.run_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_right_1.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("champions/blue_warrior/run_right_2.png").convert_alpha(), (250,260 )),
+		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_right_3.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_right_4.png").convert_alpha(), (250,260 )), 
+		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_right_5.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_right_6.png").convert_alpha(), (250,260 ))] 
+
+		self.idle_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/blue_warrior/idle_right_1.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/idle_right_2.png").convert_alpha(), (250,260 )),
+		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/idle_right_3.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/idle_right_4.png").convert_alpha(), (250,260 ))]
+
+		self.attack_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_1.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_2.png").convert_alpha(), (250,260 )),
+		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_3.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_4.png").convert_alpha(), (250,260 )), 
+		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_5.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_6.png").convert_alpha(), (250,260 )), 
+		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_7.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_8.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("champions/blue_warrior/attack_right_4.png").convert_alpha(), (250,260 )), 
+		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_9.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_10.png").convert_alpha(), (250,260 )), 
+		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_11.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_12.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("champions/blue_warrior/attack_right_4.png").convert_alpha(), (250,260 )), 
+		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_13.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_14.png").convert_alpha(), (250,260 )), 
+		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_15.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_16.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("champions/blue_warrior/attack_right_4.png").convert_alpha(), (250,260 )), 
+		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_17.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_18.png").convert_alpha(), (250,260 )), 
+		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_19.png").convert_alpha(), (250,260 ))]
+
+
+		self.run_right_animation = False 
+		self.run_left_animation = False
+		self.attack_animation = False
+		self.idle_animation = False
+		self.current_sprite = 0
+		self.image = self.run_left_sprites[self.current_sprite]
+		self.rect = self.image.get_rect()
+		self.rect.center = [950,320] # Fixed position of player 
+
+		self.vel = 6
+		self.neg_vel = -7 
+
+	def start_running(self):
+		self.idle_animation = False 
+		self.run_right_animation = True
+
+	def start_idle(self):
+		self.idle_animation = True
+
+	def reset_vel(self):
+		self.vel = 6 
+	
+	def reset_neg_vel(self):
+		self.neg_vel = -7 
+
+	def update(self):
+		self.advanced_health()
+
+		if self.run_right_animation:
+			self.reset_neg_vel()
+			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
+			self.current_sprite += 0.2 
+			if int(self.current_sprite) >= len(self.run_right_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] <= 240:
+				self.vel = 0 
+				self.run_right_animation = False 
+				self.attack_animation = True    
+			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+		if self.attack_animation:
+			self.current_sprite += 0.15 
+			if int(self.current_sprite) >= len(self.attack_right_sprites):
+				self.current_sprite = 0
+				self.attack_animation = False 
+				self.run_left_animation = True    
+			self.image = self.attack_right_sprites[int(self.current_sprite)]
+
+		if self.run_left_animation:
+			self.reset_vel()
+			self.current_sprite += 0.2 
+			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by negative velocity so it moves right on x axis.
+			if int(self.current_sprite) >= len(self.run_left_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] >= 950:
+				self.neg_vel = 0 
+				self.run_left_animation = False
+				self.start_idle()
+			self.image = self.run_left_sprites[int(self.current_sprite)]	
+
+		if self.idle_animation:
+			self.current_sprite += 0.10
+			if int(self.current_sprite) >= len(self.idle_right_sprites):
+				self.current_sprite = 0
+
+			self.image = self.idle_right_sprites[int(self.current_sprite)]
+
