@@ -14,17 +14,20 @@ class Game:
 		self.ties = 0
 		self.pl_zero = []
 		self.pl_one = []
+		self.p1_chose = False 
+		self.p2_chose = False
 
 
 	def both_chose(self):
-		return self.pla_chose_champ and self.en_chose_champ
-
+		return self.p1_chose and self.p2_chose
 
 	def set_champions(self, player, champion):
 		if player == 0: 
 			self.pl_zero.append(champion)
+			self.p1_chose = True 
 		elif player == 1:
 			self.pl_one.append(champion)
+			self.p2_chose = True 
 
 	'''
 	def set_player_zero(self, champion):
@@ -34,12 +37,11 @@ class Game:
 		self.en_cha = champion
 	'''
 
-	def return_pl_cha(self):
-		return self.pl_cha 
+	def return_pl_zero_cha(self):
+		return self.pl_zero 
 
-	def champions_set(self):
-		return self.pla_chose_champ and self.en_chose_champ
-
+	def return_pl_one_cha(self):
+		return self.pl_one 
 
 	def get_player_move(self, p):
 		"""
