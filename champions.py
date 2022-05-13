@@ -5,6 +5,7 @@ class Champion:
 	def __init__(self):
 		self.max_health = 100 
 		self.health = 100 
+		self.energy = 100 
 		self.attack_damage = 10
 		self.attack = False 
 		self.heal = False 
@@ -16,6 +17,47 @@ class Champion:
 		self.health_bar_length = 300
 		self.health_ratio = self.max_health / self.health_bar_length
 		self.health_change_speed = 5
+		# Energybar parameters 
+		self.current_energy = 1000
+		self.target_energy = 1000 
+		self.max_energy = 1000
+		self.energy_bar_length = 300
+		self.energy_ratio = self.max_energy / self.energy_bar_length
+		self.energy_change_speed = 5
+
+	def get_energy(self,amount):
+		if self.target_energy < self.max_energy:
+			self.target_energy += amount
+		if self.target_energy > self.max_energy:
+			self.target_energy = self.max_energy
+			
+	def lose_energy(self,amount):
+		if self.target_energy > 0:
+			self.target_energy -= amount
+		if self.target_energy < 0:
+			self.target_energy = 0
+
+	def advanced_energy(self):
+		transition_width = 0
+		transition_color = (255, 222, 0)
+
+		if self.current_energy < self.target_energy:
+			self.current_energy += self.energy_change_speed
+			transition_width = int((self.target_energy - self.current_energy) / self.energy_ratio)
+			transition_color = (0,255,0)
+
+		if self.current_energy > self.target_energy:
+			self.current_energy -= self.energy_change_speed 
+			transition_width = int((self.target_energy - self.current_energy) / self.energy_ratio)
+			transition_color = (255,255,0)
+
+		energy_bar_width = int(self.current_energy / self.energy_ratio)
+		energy_bar = pygame.Rect(200,100,energy_bar_width,25)
+		transition_bar = pygame.Rect(energy_bar.right,45,transition_width,25)
+		
+		pygame.draw.rect(screen,(255, 222, 0),energy_bar)
+		pygame.draw.rect(screen,transition_color,transition_bar)	
+		pygame.draw.rect(screen,(255,255,255),(200,100,self.energy_bar_length,25),4)	
 
 	def get_damage(self,amount):
 		if self.target_health > 0:
@@ -147,6 +189,7 @@ class MeleeChampionOne(Champion, pygame.sprite.Sprite):
 
 	def update(self):
 		self.advanced_health()
+		self.advanced_energy()
 
 		if self.run_left_animation:
 			self.reset_vel()
@@ -248,6 +291,7 @@ class MeleeChampionTwo(Champion, pygame.sprite.Sprite):
 
 	def update(self):
 		self.advanced_health()
+		self.advanced_energy()
 
 		if self.run_left_animation:
 			self.reset_vel()
@@ -350,6 +394,7 @@ class MeleeChampionThree(Champion, pygame.sprite.Sprite):
 
 	def update(self):
 		self.advanced_health()
+		self.advanced_energy()
 
 		if self.run_left_animation:
 			self.reset_vel()
@@ -434,6 +479,7 @@ class RangeChampionOne(Champion, pygame.sprite.Sprite):
 
 	def update(self):
 		self.advanced_health()
+		self.advanced_energy()
 
 		if self.attack_animation:
 			self.current_sprite += 0.2 
