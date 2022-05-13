@@ -27,7 +27,7 @@ def get_font(size): # Returns Press-Start-2P in the desired size
     return pygame.font.Font("assets/font.ttf", size)
 
 
-def redrawWindow(win, game, p, BG, BOX, BOX_B, moving_sprites):
+def redrawWindow(win, game, p, BG, BOX, BOX_B, moving_sprites, ppl, een):
     
     win.fill((128,128,128))
     
@@ -80,8 +80,10 @@ def redrawWindow(win, game, p, BG, BOX, BOX_B, moving_sprites):
         for btn in btns:
             btn.draw(win)
         
+        ppl.update() # Use the update comand so that animations can be switched in real time without lag 
+        een.update()  
         moving_sprites.draw(win) 
-    pygame.display.update()
+    pygame.display.flip()
 
 '''
 main is responsible for the online part of the game and 
@@ -106,56 +108,50 @@ def main():
     else: 
         x = enemy_selector()
 
-    print("You are player", player)
-
     data = ("register " + f"{str(x)}")
     n.send(data) 
             
-    '''
-    if player == 0:
-        current_player = player_zero_champions_as_str.index(''.join(str(v) for v in game.pl_zero))
-        current_player_obj = player_zero_champions_as_obj[current_player]
-        # enemy_player = player_one_champions_as_str.index(''.join(str(v) for v in game.pl_one))
-        # enemy_player_obj = player_one_champions_as_obj[enemy_player]
-        moving_sprites = pygame.sprite.Group()
-    
-        ppl = current_player_obj() 
-        # een = enemy_player_obj() 
-        moving_sprites.add(ppl)
-
-    elif player == 1:
-        current_player = player_one_champions_as_str.index(''.join(str(v) for v in game.pl_one))
-        current_player_obj = player_one_champions_as_obj[current_player]
-        ppl = current_player_obj() 
-        # een = enemy_player_obj() 
-        moving_sprites.add(ppl)
-    '''
-    
     moving_sprites = pygame.sprite.Group()
-        
     ppl = x() 
-    # een = enemy_player_obj() 
     moving_sprites.add(ppl)
 
+    # Within this loop the game is waiting for both players to connect on a game and for both of them to pick a champion 
     loop = True 
-
     while loop:
+        win.fill((128,128,128))
         game = n.send("get") 
+
+        # The player that creates a game has id:0 
+        # Once a player with id:1 joins the game take the string representing their choice and match it with the enemy champion class object 
+        # The champion class objects are ment to be rendered on the left of the screen while enemy champions are rendered on the right. 
+        # Both Enemy champions and normal champions are the same. 
         if player == 0 and game.both_chose():
-            enmy = game.return_pl_one_cha()
             enemy_player = player_one_champions_as_str.index(''.join(str(v) for v in game.pl_one))
             enemy_player_obj = player_one_champions_as_obj[enemy_player]
             een = enemy_player_obj()
             moving_sprites.add(een)
             loop = False 
-        if player == 1 and game.both_chose():
-            enmy = game.return_pl_zero_cha()
+        # If the player joins an already created game take the users champion and render it on the right side of the screen. 
+        elif player == 1 and game.both_chose():
             enemy_player = player_zero_champions_as_str.index(''.join(str(v) for v in game.pl_zero))
             enemy_player_obj = player_zero_champions_as_obj[enemy_player]
             een = enemy_player_obj()
             moving_sprites.add(een)
             loop = False 
+        else: # If there is only one player in wait 
+            font = pygame.font.SysFont("comicsans", 80)
+            text = font.render("Waiting for Player...", 1, (255,0,0), True)
+            win.blit(text, (width/2 - text.get_width()/2, height/2 - text.get_height()/2))        
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+                pygame.quit()
+                sys.exit()
+    
+        pygame.display.update()
 
+    # Activate the idle animation for both een(player 1) and ppl(player0) champions 
     een.start_idle() 
     ppl.start_idle()
     while run:
@@ -167,12 +163,8 @@ def main():
             print("Couldn't get game")
             break
 
-        # TODO: Add function on game that returns if both pllayers are in. 
-        # If yes then try to create a player within the function on the main loop.
-        # It may work....?
-
         if game.bothWent():
-            redrawWindow(win, game, player, BG, BOX, BOX_B, moving_sprites)
+            redrawWindow(win, game, player, BG, BOX, BOX_B, moving_sprites, ppl, een) 
             try:
                 game = n.send("reset")
             except:
@@ -184,15 +176,22 @@ def main():
             if (game.winner() == 1 and player == 1) or (game.winner() == 0 and player == 0):
                 text = font.render("You Won!", 1, (255,0,0))
                 ppl.start_running() 
+                een.health -= 25
+                een.get_damage(250)
+                een.energy -= 25
+                een.lose_energy(250)
+
             elif game.winner() == -1:
                 text = font.render("Tie Game!", 1, (255,0,0))
             else:
                 text = font.render("You Lost...", 1, (255, 0, 0))
                 een.start_running()
+                ppl.health -= 25
+                ppl.get_damage(250)
+                ppl.energy -= 25
+                ppl.lose_energy(250)
 
             win.blit(text, (width/2 - text.get_width()/2, height/2 - text.get_height()/2))
-            pygame.display.update()
-            pygame.time.delay(2000)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -211,12 +210,17 @@ def main():
                             if not game.p2Went:
                                 n.send(btn.text)
     
+
+        if een.health <= 0: 
+        # start_loading_screen()
+            return False
+        
+        if ppl.health <= 0:
+            # start_loading_screen()
+            return False
          
-        redrawWindow(win, game, player, BG,  BOX, BOX_B, moving_sprites)
-        ppl.update() 
-        een.update() 
+        redrawWindow(win, game, player, BG,  BOX, BOX_B, moving_sprites, ppl, een) 
         pygame.display.flip()
-        pygame.display.update()
 
 
 def play_offline():   # TODO: Take this out once the select champion screen is completed 
