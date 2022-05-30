@@ -1,8 +1,0 @@
-2022-04-17
-
-The main goal of this week was to add threading on the program. 
-Unfortunatelly pygame doesn't properly support threading. Instead I created a shortcut and used the redraw window 
-in order to get enemy moves. 
-
-Next week:
-    Finish basic selection, animation and movement of characters 
