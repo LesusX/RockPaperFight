@@ -2,16 +2,38 @@ import pygame
 screen = pygame.display.set_mode((1200,720))
 
 class Champion(pygame.sprite.Sprite):
-	def __init__(self):
-		super().__init__()
-		# Champion parameters 
+	def __init__(self, name, element, sprite_width, sprite_height, weakness, strong_against, arena_bonus):
+		#----------------------------------------------------------
+		self.ultimate_attack_animation = False 
+		self.run_right_animation = False 
+		self.run_left_animation = False 
+		self.attack_animation = False
+		self.idle_animation = False
+		self.take_hit_right = False 
+		self.death_right = False 
+		self.ul_attack = False  		
+		
+		self.death_animation = False 
+		self.hit_animation = False 
+		self.ult_attack_animation = False
+		#----------------------------------------------------------
+		self.name = name 
+		self.element = element
+		self.weakness = weakness 
+		self.strong_against = strong_against 
+		self.sprite_width = sprite_width
+		self.sprite_height = sprite_height 
+		self.arena_bonus = arena_bonus 
+		#---------------------
 		self.max_health = 100 
 		self.health = 100 
 		self.energy = 100 
 		self.attack_damage = 10
 		self.attack = False 
 		self.heal = False 
-		self.power_up = False 
+		self.power_up = False
+		self.attack_done = False 
+		self.attack_landed = False 
 		# Healthbar parameters 
 		self.current_health = 1000
 		self.target_health = 1000 
@@ -20,13 +42,43 @@ class Champion(pygame.sprite.Sprite):
 		self.health_ratio = self.max_health / self.health_bar_length
 		self.health_change_speed = 5
 		# Energybar parameters 
-		self.current_energy = 1000
-		self.target_energy = 1000 
+		self.current_energy = 100
+		self.target_energy = 100 
 		self.max_energy = 1000
 		self.energy_bar_length = 300
 		self.energy_ratio = self.max_energy / self.energy_bar_length
 		self.energy_change_speed = 5
+	#---------------------------------------------------------
 
+	def start_running(self):
+		self.idle_animation = False 
+		self.run_right_animation = True
+
+	def start_idle(self):
+		self.idle_animation = True
+
+	def start_running_with_ult(self):
+		self.idle_animation = False 
+		self.run_right_animation = True
+		self.ul_attack = True 
+
+	def start_hit_anim(self):
+		self.idle_animation = False 
+		self.hit_animation = True 
+
+
+	def start_death_animation(self):
+		self.idle_animation = False 
+		self.death_animation = True
+
+	def reset_attack(self):
+		self.attack_done = False 
+
+	def reset_attack_landed(self):
+		self.attack_landed = False 
+
+
+	#--------------------------------------------------------
 	def get_energy(self,amount):
 		if self.target_energy < self.max_energy:
 			self.target_energy += amount
@@ -55,7 +107,7 @@ class Champion(pygame.sprite.Sprite):
 
 		energy_bar_width = int(self.current_energy / self.energy_ratio)
 		energy_bar = pygame.Rect(800,100,energy_bar_width,25)
-		transition_bar = pygame.Rect(energy_bar.right,45,transition_width,25)
+		transition_bar = pygame.Rect(energy_bar.right,100,transition_width,25)
 		
 		pygame.draw.rect(screen,(255, 222, 0),energy_bar)
 		pygame.draw.rect(screen,transition_color,transition_bar)	
@@ -90,7 +142,7 @@ class Champion(pygame.sprite.Sprite):
 
 		health_bar_width = int(self.current_health / self.health_ratio)
 		health_bar = pygame.Rect(800,70,health_bar_width,25)
-		transition_bar = pygame.Rect(health_bar.right,45,transition_width,25)
+		transition_bar = pygame.Rect(health_bar.right,100,transition_width,25)
 		
 		pygame.draw.rect(screen,(255,0,0),health_bar)
 		pygame.draw.rect(screen,transition_color,transition_bar)	
@@ -134,76 +186,75 @@ class Champion(pygame.sprite.Sprite):
 	def champion_information(self):
 		return (f"\n{self.name} is clicked! \n{self.information}")
 
-
+# Dash 
 class EnemyMeleeChampionOne(Champion, pygame.sprite.Sprite):
-
 	def __init__(self):
-		Champion.__init__(self)
-		pygame.sprite.Sprite.__init__(self)
-		self.name = "Marcus Aurelius" 
-		self.information = "Info about: Marcus Aurelius"
-		self.type = "water"
-		self.color = "black"
+		Champion.__init__(self, "Dash", "Fire", 830, 550, "Dark", "Fire", "ice")
+		pygame.sprite.Sprite.__init__(self) 
+
+		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Dash/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Dash/run_left_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/run_left_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Dash/run_left_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/run_left_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Dash/run_left_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/run_left_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.idle_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Dash/idle_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/idle_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Dash/idle_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/idle_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Dash/idle_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/idle_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Dash/idle_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/idle_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.run_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Dash/run_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/run_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Dash/run_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/run_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Dash/run_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/run_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Dash/run_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/run_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.attack_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Dash/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Dash/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Dash/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Dash/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Dash/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Dash/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Dash/attack_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)),pygame.transform.scale(pygame.image.load("Champions/Dash/attack_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Dash/attack_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Dash/attack_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Dash/attack_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
 
-		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("Champions/blue_knight/run_left_1.png").convert_alpha(), (600,660 )), pygame.transform.scale(pygame.image.load("Champions/blue_knight/run_left_2.png").convert_alpha(), (600,660 )),
-		pygame.transform.scale(pygame.image.load("Champions/blue_knight/run_left_3.png").convert_alpha(), (600,660 )), pygame.transform.scale(pygame.image.load("Champions/blue_knight/run_left_4.png").convert_alpha(), (600,660 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_knight/run_left_5.png").convert_alpha(), (600,660 )), pygame.transform.scale(pygame.image.load("Champions/blue_knight/run_left_6.png").convert_alpha(), (600,660 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_knight/run_left_7.png").convert_alpha(), (600,660 )), pygame.transform.scale(pygame.image.load("Champions/blue_knight/run_left_8.png").convert_alpha(), (600,660 ))]
+		self.take_hit_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Dash/take_hit_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/take_hit_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Dash/take_hit_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/take_hit_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Dash/take_hit_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/take_hit_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-		self.idle_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/blue_knight/idle_right_1.png").convert_alpha(), (600,660 )), pygame.transform.scale(pygame.image.load("Champions/blue_knight/idle_right_2.png").convert_alpha(), (600,660 )),
-		pygame.transform.scale(pygame.image.load("Champions/blue_knight/idle_right_3.png").convert_alpha(), (600,660 )), pygame.transform.scale(pygame.image.load("Champions/blue_knight/idle_right_4.png").convert_alpha(), (600,660 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_knight/idle_right_5.png").convert_alpha(), (600,660 )), pygame.transform.scale(pygame.image.load("Champions/blue_knight/idle_right_6.png").convert_alpha(), (600,660 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_knight/idle_right_7.png").convert_alpha(), (600,660 ))]
-
-		self.run_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/blue_knight/run_right_1.png").convert_alpha(), (600,660 )), pygame.transform.scale(pygame.image.load("Champions/blue_knight/run_right_2.png").convert_alpha(), (600,660 )),
-		pygame.transform.scale(pygame.image.load("Champions/blue_knight/run_right_3.png").convert_alpha(), (600,660 )), pygame.transform.scale(pygame.image.load("Champions/blue_knight/run_right_4.png").convert_alpha(), (600,660 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_knight/run_right_5.png").convert_alpha(), (600,660 )), pygame.transform.scale(pygame.image.load("Champions/blue_knight/run_right_6.png").convert_alpha(), (600,660 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_knight/run_right_7.png").convert_alpha(), (600,660 )), pygame.transform.scale(pygame.image.load("Champions/blue_knight/run_right_8.png").convert_alpha(), (600,660 ))]
-
-		self.attack_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/blue_knight/attack_right_1.png").convert_alpha(), (600,660 )), pygame.transform.scale(pygame.image.load("Champions/blue_knight/attack_right_2.png").convert_alpha(), (600,660 )),
-		pygame.transform.scale(pygame.image.load("Champions/blue_knight/attack_right_3.png").convert_alpha(), (600,660 )), pygame.transform.scale(pygame.image.load("Champions/blue_knight/attack_right_4.png").convert_alpha(), (600,660 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_knight/attack_right_5.png").convert_alpha(), (600,660 )), pygame.transform.scale(pygame.image.load("Champions/blue_knight/attack_right_6.png").convert_alpha(), (600,660 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_knight/attack_right_7.png").convert_alpha(), (600,660 ))]
-
-
-		self.run_right_animation = False 
-		self.run_left_animation = False
-		self.idle_animation = False
-		self.attack_animation = False
+		self.death_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Dash/death_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/death_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Dash/death_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/death_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Dash/death_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/death_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Dash/death_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/death_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Dash/death_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/death_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Dash/death_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/death_right_12.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Dash/death_right_13.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+		
 		self.current_sprite = 0
 		self.image = self.run_left_sprites[self.current_sprite]
 		self.rect = self.image.get_rect()
-		self.rect.center = [950,360] # Fixed position of player 
+		self.rect.center = [950, 200] # Position of player 
 		self.moving = pygame.Rect(180,355,400,450)
 
-		self.vel = 6
-		self.neg_vel = -7 
-
-	def start_running(self):
-		self.idle_animation = False 
-		self.run_right_animation = True
-
-	def start_idle(self):
-		self.idle_animation = True
+		self.vel = 15
+		self.neg_vel = -15 
 
 	def reset_vel(self):
-		self.vel = 6 
+		self.vel = 15 
 
 	def reset_neg_vel(self):
-		self.neg_vel = -7 
+		self.neg_vel = -15
 
 	def update(self):
 		self.advanced_health()
 		self.advanced_energy()
+		self.reset_attack()
+		self.reset_attack_landed()
 
-		if self.run_right_animation:
+		if self.run_right_animation:	
 			self.reset_neg_vel()
 			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
-			self.current_sprite += 0.2 
+			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_right_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] <= 240:
+			if self.rect.center[0] <= 290:
 				self.neg_vel = 0 
 				self.run_right_animation = False 
 				self.attack_animation = True 
@@ -211,133 +262,1285 @@ class EnemyMeleeChampionOne(Champion, pygame.sprite.Sprite):
 
 
 		if self.attack_animation:
-			self.current_sprite += 0.08 
+			self.current_sprite += 0.16 
 			if int(self.current_sprite) >= len(self.attack_right_sprites):
 				self.current_sprite = 0
 				self.attack_animation = False 
-				self.run_left_animation = True    
+				self.run_left_animation = True   
+				self.attack_landed = True  
 			self.image = self.attack_right_sprites[int(self.current_sprite)]
 
 
 		if self.run_left_animation:
 			self.reset_vel()
-			self.current_sprite += 0.2 
+			self.current_sprite += 0.45 
 			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by negative velocity so it moves right on x axis.
 			if int(self.current_sprite) >= len(self.run_left_sprites):
 				self.current_sprite = 0
 			if self.rect.center[0] >= 950:
 				self.neg_vel = 0 
 				self.run_left_animation = False
+				self.attack_done = True 
 				self.start_idle()
 			self.image = self.run_left_sprites[int(self.current_sprite)]	
 
+		if self.hit_animation:
+			self.current_sprite += 0.15
+			if int(self.current_sprite) >= len(self.take_hit_right_sprites):
+				self.current_sprite = 0
+				self.hit_animation = False 
+				self.idle_animation = True    
+			self.image = self.take_hit_right_sprites[int(self.current_sprite)]
+
+		if self.death_animation:
+			self.current_sprite += 0.25
+			if int(self.current_sprite) >= len(self.death_right_sprites):
+				self.current_sprite = 0
+				self.death_animation = False 
+			self.image = self.death_right_sprites[int(self.current_sprite)]
+
+
 		if self.idle_animation:
-			self.current_sprite += 0.10
+			self.current_sprite += 0.3
 			if int(self.current_sprite) >= len(self.idle_right_sprites):
 				self.current_sprite = 0
 
 			self.image = self.idle_right_sprites[int(self.current_sprite)]
 
-
-
-
+# Casandra
 class EnemyMeleeChampionTwo(Champion, pygame.sprite.Sprite):
 	def __init__(self):
-		Champion.__init__(self)
-		pygame.sprite.Sprite.__init__(self)
-		self.name = "Julius Caesar" 
-		self.information = "Info about: Julius Caesar"
-		self.type = "Fire"
-		self.color = "blue"
+		Champion.__init__(self, "Casandra", "Water", 1150, 700, "Air", "Fire", "ice")
+		pygame.sprite.Sprite.__init__(self) 
 
+		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Casandra/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Casandra/run_left_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/run_left_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Casandra/run_left_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/run_left_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Casandra/run_left_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/run_left_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_left_1.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_left_2.png").convert_alpha(), (250,260 )),
-		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_left_3.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_left_4.png").convert_alpha(), (250,260 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_left_5.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_left_6.png").convert_alpha(), (250,260 ))]
+		self.run_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Casandra/run_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/run_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Casandra/run_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/run_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Casandra/run_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/run_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Casandra/run_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/run_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-		self.run_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_right_1.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("champions/blue_warrior/run_right_2.png").convert_alpha(), (250,260 )),
-		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_right_3.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_right_4.png").convert_alpha(), (250,260 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_right_5.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/run_right_6.png").convert_alpha(), (250,260 ))] 
+		self.idle_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Casandra/idle_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/idle_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Casandra/idle_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/idle_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Casandra/idle_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/idle_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Casandra/idle_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/idle_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-		self.idle_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/blue_warrior/idle_right_1.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/idle_right_2.png").convert_alpha(), (250,260 )),
-		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/idle_right_3.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/idle_right_4.png").convert_alpha(), (250,260 ))]
+		self.attack_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Casandra/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/attack_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)),pygame.transform.scale(pygame.image.load("Champions/Casandra/attack_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/attack_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/attack_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/attack_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-		self.attack_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_1.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_2.png").convert_alpha(), (250,260 )),
-		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_3.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_4.png").convert_alpha(), (250,260 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_5.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_6.png").convert_alpha(), (250,260 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_7.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_8.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("champions/blue_warrior/attack_right_4.png").convert_alpha(), (250,260 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_9.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_10.png").convert_alpha(), (250,260 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_11.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_12.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("champions/blue_warrior/attack_right_4.png").convert_alpha(), (250,260 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_13.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_14.png").convert_alpha(), (250,260 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_15.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_16.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("champions/blue_warrior/attack_right_4.png").convert_alpha(), (250,260 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_17.png").convert_alpha(), (250,260 )), pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_18.png").convert_alpha(), (250,260 )), 
-		pygame.transform.scale(pygame.image.load("Champions/blue_warrior/attack_right_19.png").convert_alpha(), (250,260 ))]
+		self.ut_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_12.png").convert_alpha(), (self.sprite_width, self.sprite_height)),		
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_13.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_14.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_15.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_16.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_17.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_18.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_19.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_20.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_21.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_22.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_23.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_24.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_25.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_26.png").convert_alpha(), (self.sprite_width, self.sprite_height)),		
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_27.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_28.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_29.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_30.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_31.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_32.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
+		self.take_hit_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Casandra/take_hit_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/take_hit_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Casandra/take_hit_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/take_hit_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Casandra/take_hit_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/take_hit_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Casandra/take_hit_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-		self.run_right_animation = False 
-		self.run_left_animation = False
-		self.attack_animation = False
-		self.idle_animation = False
+		self.death_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Casandra/death_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/death_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Casandra/death_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/death_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Casandra/death_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/death_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Casandra/death_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/death_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Casandra/death_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/death_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Casandra/death_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/death_right_12.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Casandra/death_right_13.png").convert_alpha(), (self.sprite_width, self.sprite_height)),pygame.transform.scale(pygame.image.load("champions/Casandra/death_right_14.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Casandra/death_right_15.png").convert_alpha(), (self.sprite_width, self.sprite_height)),pygame.transform.scale(pygame.image.load("champions/Casandra/death_right_16.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
 		self.current_sprite = 0
 		self.image = self.run_left_sprites[self.current_sprite]
 		self.rect = self.image.get_rect()
-		self.rect.center = [950,320] # Fixed position of player 
+		self.rect.center = [980, 120] # Position of player 
+		self.moving = pygame.Rect(180,355,400,450)
 
-		self.vel = 6
-		self.neg_vel = -7 
+		self.vel = 15
+		self.neg_vel = -15 
 
-	def start_running(self):
-		self.idle_animation = False 
-		self.run_right_animation = True
-
-	def start_idle(self):
-		self.idle_animation = True
 
 	def reset_vel(self):
-		self.vel = 6 
-	
+		self.vel = 15 
+
 	def reset_neg_vel(self):
-		self.neg_vel = -7 
+		self.neg_vel = -15
 
 	def update(self):
 		self.advanced_health()
 		self.advanced_energy()
+		self.reset_attack()
+		self.reset_attack_landed()
 
-		if self.run_right_animation:
+		if self.run_right_animation:	
 			self.reset_neg_vel()
 			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
-			self.current_sprite += 0.2 
+			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_right_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] <= 240:
-				self.vel = 0 
+			if self.rect.center[0] <= 285:
+				self.neg_vel = 0 
 				self.run_right_animation = False 
-				self.attack_animation = True    
+				self.attack_animation = True 
 			self.image = self.run_right_sprites[int(self.current_sprite)]
 
+
 		if self.attack_animation:
-			self.current_sprite += 0.15 
+			self.current_sprite += 0.25
 			if int(self.current_sprite) >= len(self.attack_right_sprites):
 				self.current_sprite = 0
 				self.attack_animation = False 
-				self.run_left_animation = True    
+				self.run_left_animation = True   
+				self.attack_landed = True  
 			self.image = self.attack_right_sprites[int(self.current_sprite)]
+
 
 		if self.run_left_animation:
 			self.reset_vel()
-			self.current_sprite += 0.2 
+			self.current_sprite += 0.45 
 			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by negative velocity so it moves right on x axis.
 			if int(self.current_sprite) >= len(self.run_left_sprites):
 				self.current_sprite = 0
 			if self.rect.center[0] >= 950:
 				self.neg_vel = 0 
 				self.run_left_animation = False
+				self.attack_done = True 
 				self.start_idle()
 			self.image = self.run_left_sprites[int(self.current_sprite)]	
 
+		if self.hit_animation:
+			self.current_sprite += 0.15
+			if int(self.current_sprite) >= len(self.take_hit_right_sprites):
+				self.current_sprite = 0
+				self.hit_animation = False 
+				self.idle_animation = True    
+			self.image = self.take_hit_right_sprites[int(self.current_sprite)]
+
+		if self.death_animation:
+			self.current_sprite += 0.25
+			if int(self.current_sprite) >= len(self.death_right_sprites):
+				self.current_sprite = 0
+				self.death_animation = False 
+			self.image = self.death_right_sprites[int(self.current_sprite)]
+
 		if self.idle_animation:
-			self.current_sprite += 0.10
+			self.current_sprite += 0.3
 			if int(self.current_sprite) >= len(self.idle_right_sprites):
 				self.current_sprite = 0
 
 			self.image = self.idle_right_sprites[int(self.current_sprite)]
+
+# Ives 
+class EnemyMeleeChampionThree(Champion, pygame.sprite.Sprite):
+	def __init__(self):
+		Champion.__init__(self, "Ives", "Air", 1150, 650, "Fire", "Water", "Desert")
+		pygame.sprite.Sprite.__init__(self) 
+
+		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Ives/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Ives/run_left_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/run_left_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Ives/run_left_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/run_left_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Ives/run_left_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/run_left_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.run_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Ives/run_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/run_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Ives/run_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/run_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Ives/run_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/run_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Ives/run_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/run_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.idle_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Ives/idle_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/idle_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Ives/idle_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/idle_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Ives/idle_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/idle_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Ives/idle_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/idle_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))] 
+
+		self.attack_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Ives/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Ives/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Ives/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Ives/attack_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/attack_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.ut_left_sprites = [pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_12.png").convert_alpha(), (self.sprite_width, self.sprite_height)),		
+		pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_13.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_14.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_15.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_16.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_17.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_18.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_19.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_20.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_21.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_22.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_23.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_24.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_25.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_26.png").convert_alpha(), (self.sprite_width, self.sprite_height)),		
+		pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_27.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_28.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_29.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_30.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.take_hit_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Ives/take_hit_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/take_hit_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Ives/take_hit_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/take_hit_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Ives/take_hit_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/take_hit_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.death_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Ives/death_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/death_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Ives/death_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/death_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Ives/death_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/death_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Ives/death_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/death_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Ives/death_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/death_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Ives/death_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/death_right_12.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Ives/death_right_13.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/death_right_14.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Ives/death_right_15.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/death_right_16.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Ives/death_right_17.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Ives/death_right_18.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Ives/death_right_19.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+
+		self.current_sprite = 0
+		self.image = self.run_left_sprites[self.current_sprite]
+		self.rect = self.image.get_rect()
+		self.rect.center = [980, 150] # Position of player 
+		self.moving = pygame.Rect(180,355,400,450)
+
+		self.vel = 15
+		self.neg_vel = -15 
+
+	def reset_vel(self):
+		self.vel = 15 
+
+	def reset_neg_vel(self):
+		self.neg_vel = -15
+
+	def update(self):
+		self.advanced_health()
+		self.advanced_energy()
+		self.reset_attack()
+		self.reset_attack_landed()
+
+		if self.run_right_animation:	
+			self.reset_neg_vel()
+			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
+			self.current_sprite += 0.45 
+			if int(self.current_sprite) >= len(self.run_right_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] <= 290:
+				self.neg_vel = 0 
+				self.run_right_animation = False 
+				self.attack_animation = True 
+			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+
+		if self.attack_animation:
+			self.current_sprite += 0.2
+			if int(self.current_sprite) >= len(self.attack_right_sprites):
+				self.current_sprite = 0
+				self.attack_animation = False 
+				self.run_left_animation = True   
+				self.attack_landed = True  
+			self.image = self.attack_right_sprites[int(self.current_sprite)]
+
+		if self.run_left_animation:
+			self.reset_vel()
+			self.current_sprite += 0.45 
+			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by negative velocity so it moves right on x axis.
+			if int(self.current_sprite) >= len(self.run_left_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] >= 950:
+				self.neg_vel = 0 
+				self.run_left_animation = False
+				self.attack_done = True 
+				self.start_idle()
+			self.image = self.run_left_sprites[int(self.current_sprite)]	
+
+		if self.hit_animation:
+			self.current_sprite += 0.15
+			if int(self.current_sprite) >= len(self.take_hit_right_sprites):
+				self.current_sprite = 0
+				self.hit_animation = False 
+				self.idle_animation = True    
+			self.image = self.take_hit_right_sprites[int(self.current_sprite)]
+
+		if self.death_animation:
+			self.current_sprite += 0.25
+			if int(self.current_sprite) >= len(self.death_right_sprites):
+				self.current_sprite = 0
+				self.death_animation = False 
+			self.image = self.death_right_sprites[int(self.current_sprite)]
+
+		if self.idle_animation:
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.idle_right_sprites):
+				self.current_sprite = 0
+
+			self.image = self.idle_right_sprites[int(self.current_sprite)]
+
+# Norwin 
+class EnemyMeleeChampionFour(Champion, pygame.sprite.Sprite):
+	def __init__(self):
+		Champion.__init__(self, "Norwin", "Air", 1090, 600, "Fire", "Water", "Desert")
+		pygame.sprite.Sprite.__init__(self) 
+
+		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Norwin/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Norwin/run_left_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/run_left_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Norwin/run_left_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/run_left_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Norwin/run_left_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/run_left_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.run_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Norwin/run_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/run_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Norwin/run_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/run_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Norwin/run_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/run_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Norwin/run_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/run_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.idle_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Norwin/idle_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/idle_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Norwin/idle_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/idle_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Norwin/idle_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/idle_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Norwin/idle_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/idle_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))] 
+
+		self.attack_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Norwin/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Norwin/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Norwin/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Norwin/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Norwin/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Norwin/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Norwin/attack_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Norwin/attack_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.ut_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.take_hit_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Norwin/take_hit_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/take_hit_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Norwin/take_hit_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/take_hit_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Norwin/take_hit_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/take_hit_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.death_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Norwin/death_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/death_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Norwin/death_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/death_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Norwin/death_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/death_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Norwin/death_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/death_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Norwin/death_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/death_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Norwin/death_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+
+		self.current_sprite = 0
+		self.image = self.run_left_sprites[self.current_sprite]
+		self.rect = self.image.get_rect()
+		self.rect.center = [980, 170] # Position of player 
+		self.moving = pygame.Rect(180,355,400,450)
+
+		self.vel = 15
+		self.neg_vel = -15 
+
+	def reset_vel(self):
+		self.vel = 15 
+
+	def reset_neg_vel(self):
+		self.neg_vel = -15
+
+	def update(self):
+		self.advanced_health()
+		self.advanced_energy()
+		self.reset_attack()
+		self.reset_attack_landed()
+
+		if self.run_right_animation:	
+			self.reset_neg_vel()
+			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
+			self.current_sprite += 0.45 
+			if int(self.current_sprite) >= len(self.run_right_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] <= 290:
+				self.neg_vel = 0 
+				self.run_right_animation = False 
+				self.attack_animation = True 
+			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+
+		if self.attack_animation:
+			self.current_sprite += 0.2
+			if int(self.current_sprite) >= len(self.attack_right_sprites):
+				self.current_sprite = 0
+				self.attack_animation = False 
+				self.run_left_animation = True   
+				self.attack_landed = True  
+			self.image = self.attack_right_sprites[int(self.current_sprite)]
+
+
+		if self.run_left_animation:
+			self.reset_vel()
+			self.current_sprite += 0.45 
+			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by negative velocity so it moves right on x axis.
+			if int(self.current_sprite) >= len(self.run_left_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] >= 950:
+				self.neg_vel = 0 
+				self.run_left_animation = False
+				self.attack_done = True 
+				self.start_idle()
+			self.image = self.run_left_sprites[int(self.current_sprite)]	
+
+		if self.hit_animation:
+			self.current_sprite += 0.15
+			if int(self.current_sprite) >= len(self.take_hit_right_sprites):
+				self.current_sprite = 0
+				self.hit_animation = False 
+				self.idle_animation = True    
+			self.image = self.take_hit_right_sprites[int(self.current_sprite)]
+
+		if self.death_animation:
+			self.current_sprite += 0.25
+			if int(self.current_sprite) >= len(self.death_right_sprites):
+				self.current_sprite = 0
+				self.death_animation = False 
+			self.image = self.death_right_sprites[int(self.current_sprite)]
+
+		if self.idle_animation:
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.idle_right_sprites):
+				self.current_sprite = 0
+
+			self.image = self.idle_right_sprites[int(self.current_sprite)]
+
+# Hassaron 
+class EnemyMeleeChampionFive(Champion, pygame.sprite.Sprite):
+	def __init__(self):
+		Champion.__init__(self, "Hassaron", "Dark", 800, 850, "Fire", "Water", "Cave")
+		pygame.sprite.Sprite.__init__(self) 
+
+		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Hassaron/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Hassaron/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Hassaron/run_left_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Hassaron/run_left_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Hassaron/run_left_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Hassaron/run_left_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Hassaron/run_left_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Hassaron/run_left_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.run_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Hassaron/run_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Hassaron/run_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Hassaron/run_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Hassaron/run_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Hassaron/run_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Hassaron/run_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Hassaron/run_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Hassaron/run_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.idle_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Hassaron/idle_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Hassaron/idle_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Hassaron/idle_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Hassaron/idle_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Hassaron/idle_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Hassaron/idle_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Hassaron/idle_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Hassaron/idle_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))] 
+
+		self.attack_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Hassaron/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Hassaron/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Hassaron/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Hassaron/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Hassaron/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Hassaron/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Hassaron/attack_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Hassaron/attack_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.ut_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.take_hit_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Hassaron/take_hit_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Hassaron/take_hit_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Hassaron/take_hit_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.death_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Hassaron/death_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Hassaron/death_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Hassaron/death_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Hassaron/death_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Hassaron/death_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Hassaron/death_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Hassaron/death_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+
+		self.current_sprite = 0
+		self.image = self.run_left_sprites[self.current_sprite]
+		self.rect = self.image.get_rect()
+		self.rect.center = [980, 320] # Position of player 
+		self.moving = pygame.Rect(180,355,400,450)
+
+		self.vel = 15
+		self.neg_vel = -15 
+
+
+	def reset_vel(self):
+		self.vel = 15 
+
+	def reset_neg_vel(self):
+		self.neg_vel = -15
+
+	def update(self):
+		self.advanced_health()
+		self.advanced_energy()
+		self.reset_attack()
+		self.reset_attack_landed()
+
+		if self.run_right_animation:	
+			self.reset_neg_vel()
+			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
+			self.current_sprite += 0.45 
+			if int(self.current_sprite) >= len(self.run_right_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] <= 290:
+				self.neg_vel = 0 
+				self.run_right_animation = False 
+				self.attack_animation = True 
+			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+
+		if self.attack_animation:
+			self.current_sprite += 0.2
+			if int(self.current_sprite) >= len(self.attack_right_sprites):
+				self.current_sprite = 0
+				self.attack_animation = False 
+				self.run_left_animation = True   
+				self.attack_landed = True  
+			self.image = self.attack_right_sprites[int(self.current_sprite)]
+
+
+		if self.run_left_animation:
+			self.reset_vel()
+			self.current_sprite += 0.45 
+			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by negative velocity so it moves right on x axis.
+			if int(self.current_sprite) >= len(self.run_left_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] >= 950:
+				self.neg_vel = 0 
+				self.run_left_animation = False
+				self.attack_done = True 
+				self.start_idle()
+			self.image = self.run_left_sprites[int(self.current_sprite)]	
+
+		if self.hit_animation:
+			self.current_sprite += 0.15
+			if int(self.current_sprite) >= len(self.take_hit_right_sprites):
+				self.current_sprite = 0
+				self.hit_animation = False 
+				self.idle_animation = True    
+			self.image = self.take_hit_right_sprites[int(self.current_sprite)]
+
+		if self.death_animation:
+			self.current_sprite += 0.25
+			if int(self.current_sprite) >= len(self.death_right_sprites):
+				self.current_sprite = 0
+				self.death_animation = False 
+			self.image = self.death_right_sprites[int(self.current_sprite)]
+
+		if self.idle_animation:
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.idle_right_sprites):
+				self.current_sprite = 0
+
+			self.image = self.idle_right_sprites[int(self.current_sprite)]
+
+# Irathas 
+class EnemyMeleeChampionSix(Champion, pygame.sprite.Sprite):
+	def __init__(self):
+		Champion.__init__(self, "Irathas", "Dark", 440, 500, "Fire", "Air", "Cave")
+		pygame.sprite.Sprite.__init__(self) 
+
+		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Irathas/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irathas/run_left_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/run_left_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Irathas/run_left_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/run_left_6.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.run_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Irathas/run_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/run_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irathas/run_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/run_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Irathas/run_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/run_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+
+		self.idle_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Irathas/idle_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/idle_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irathas/idle_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/idle_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Irathas/idle_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/idle_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Irathas/idle_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/idle_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))] 
+
+		self.attack_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_12.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.ut_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_12.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.take_hit_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Irathas/take_hit_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/take_hit_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irathas/take_hit_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/take_hit_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Irathas/take_hit_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.death_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_12.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_13.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_14.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_15.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_16.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_17.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_18.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_19.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_20.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_21.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_22.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irathas/death_right_23.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+
+		self.current_sprite = 0
+		self.image = self.run_left_sprites[self.current_sprite]
+		self.rect = self.image.get_rect()
+		self.rect.center = [980, 320] # Position of player 
+		self.moving = pygame.Rect(180,355,400,450)
+
+		self.vel = 16
+		self.neg_vel = -16 
+
+	def reset_vel(self):
+		self.vel = 16 
+
+	def reset_neg_vel(self):
+		self.neg_vel = -16
+
+	def update(self):
+		self.advanced_health()
+		self.advanced_energy()
+		self.reset_attack()
+		self.reset_attack_landed()
+
+		if self.run_right_animation:	
+			self.reset_neg_vel()
+			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
+			self.current_sprite += 0.4
+			if int(self.current_sprite) >= len(self.run_right_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] <= 290:
+				self.neg_vel = 0 
+				self.run_right_animation = False 
+				self.attack_animation = True 
+			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+
+		if self.attack_animation:
+			self.current_sprite += 0.45
+			if int(self.current_sprite) >= len(self.attack_right_sprites):
+				self.current_sprite = 0
+				self.attack_animation = False 
+				self.run_left_animation = True   
+				self.attack_landed = True  
+			self.image = self.attack_right_sprites[int(self.current_sprite)]
+
+
+		if self.run_left_animation:
+			self.reset_vel()
+			self.current_sprite += 0.4
+			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by negative velocity so it moves right on x axis.
+			if int(self.current_sprite) >= len(self.run_left_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] >= 950:
+				self.neg_vel = 0 
+				self.run_left_animation = False
+				self.attack_done = True 
+				self.start_idle()
+			self.image = self.run_left_sprites[int(self.current_sprite)]	
+
+		if self.hit_animation:
+			self.current_sprite += 0.15
+			if int(self.current_sprite) >= len(self.take_hit_right_sprites):
+				self.current_sprite = 0
+				self.hit_animation = False 
+				self.idle_animation = True    
+			self.image = self.take_hit_right_sprites[int(self.current_sprite)]
+
+		if self.death_animation:
+			self.current_sprite += 0.25
+			if int(self.current_sprite) >= len(self.death_right_sprites):
+				self.current_sprite = 0
+				self.death_animation = False 
+			self.image = self.death_right_sprites[int(self.current_sprite)]
+
+		if self.idle_animation:
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.idle_right_sprites):
+				self.current_sprite = 0
+
+			self.image = self.idle_right_sprites[int(self.current_sprite)]
+
+# Irgomir 
+class EnemyMeleeChampionSeven(Champion, pygame.sprite.Sprite):
+	def __init__(self):
+		Champion.__init__(self, "Irgomir", "Air", 420, 350, "Fire", "Water", "Forest")
+		pygame.sprite.Sprite.__init__(self) 
+
+		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Irgomir/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irgomir/run_left_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/run_left_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Irgomir/run_left_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/run_left_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irgomir/run_left_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/run_left_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.run_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Irgomir/run_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/run_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irgomir/run_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/run_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Irgomir/run_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/run_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irgomir/run_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/run_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.idle_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Irgomir/idle_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/idle_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irgomir/idle_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/idle_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Irgomir/idle_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/idle_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height))] 
+
+		self.attack_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.ut_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.take_hit_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Irgomir/take_hit_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/take_hit_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irgomir/take_hit_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.death_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Irgomir/death_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/death_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irgomir/death_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/death_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Irgomir/death_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/death_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irgomir/death_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/death_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Irgomir/death_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+
+		self.current_sprite = 0
+		self.image = self.run_left_sprites[self.current_sprite]
+		self.rect = self.image.get_rect()
+		self.rect.center = [980, 325] # Position of player 
+		self.moving = pygame.Rect(180,355,400,450)
+
+		self.vel = 16
+		self.neg_vel = -16 
+
+	def reset_vel(self):
+		self.vel = 16 
+
+	def reset_neg_vel(self):
+		self.neg_vel = -16
+
+	def update(self):
+		self.advanced_health()
+		self.advanced_energy()
+		self.reset_attack()
+		self.reset_attack_landed()
+
+		if self.run_right_animation:	
+			self.reset_neg_vel()
+			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
+			self.current_sprite += 0.4
+			if int(self.current_sprite) >= len(self.run_right_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] <= 290:
+				self.neg_vel = 0 
+				self.run_right_animation = False 
+				self.attack_animation = True 
+			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+
+		if self.attack_animation:
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.attack_right_sprites):
+				self.current_sprite = 0
+				self.attack_animation = False 
+				self.run_left_animation = True   
+				self.attack_landed = True  
+			self.image = self.attack_right_sprites[int(self.current_sprite)]
+
+
+		if self.run_left_animation:
+			self.reset_vel()
+			self.current_sprite += 0.4
+			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by negative velocity so it moves right on x axis.
+			if int(self.current_sprite) >= len(self.run_left_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] >= 950:
+				self.neg_vel = 0 
+				self.run_left_animation = False
+				self.attack_done = True 
+				self.start_idle()
+			self.image = self.run_left_sprites[int(self.current_sprite)]	
+
+		if self.hit_animation:
+			self.current_sprite += 0.15
+			if int(self.current_sprite) >= len(self.take_hit_right_sprites):
+				self.current_sprite = 0
+				self.hit_animation = False 
+				self.idle_animation = True    
+			self.image = self.take_hit_right_sprites[int(self.current_sprite)]
+
+		if self.death_animation:
+			self.current_sprite += 0.25
+			if int(self.current_sprite) >= len(self.death_right_sprites):
+				self.current_sprite = 0
+				self.death_animation = False 
+			self.image = self.death_right_sprites[int(self.current_sprite)]
+
+		if self.idle_animation:
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.idle_right_sprites):
+				self.current_sprite = 0
+
+			self.image = self.idle_right_sprites[int(self.current_sprite)]
+
+# Lambert
+class EnemyMeleeChampionEight(Champion, pygame.sprite.Sprite):
+	def __init__(self):
+		Champion.__init__(self, "Lambert", "Dark", 520, 450, "Fire", "Air", "Cave")
+		pygame.sprite.Sprite.__init__(self) 
+
+		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Lambert/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Lambert/run_left_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/run_left_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Lambert/run_left_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/run_left_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Lambert/run_left_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/run_left_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.run_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Lambert/run_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/run_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Lambert/run_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/run_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Lambert/run_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/run_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Lambert/run_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/run_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.idle_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Lambert/idle_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/idle_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Lambert/idle_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/idle_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Lambert/idle_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/idle_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height))] 
+
+		self.attack_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Lambert/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Lambert/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Lambert/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Lambert/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Lambert/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Lambert/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Lambert/attack_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Lambert/attack_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.ut_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.take_hit_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Lambert/take_hit_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/take_hit_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Lambert/take_hit_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/take_hit_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.death_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Lambert/death_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/death_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Lambert/death_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/death_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Lambert/death_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/death_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Lambert/death_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+
+		self.current_sprite = 0
+		self.image = self.run_left_sprites[self.current_sprite]
+		self.rect = self.image.get_rect()
+		self.rect.center = [980, 350] # Position of player 
+		self.moving = pygame.Rect(180,355,400,450)
+
+		self.vel = 16
+		self.neg_vel = -16 
+
+
+	def reset_vel(self):
+		self.vel = 16 
+
+	def reset_neg_vel(self):
+		self.neg_vel = -16
+
+	def update(self):
+		self.advanced_health()
+		self.advanced_energy()
+		self.reset_attack()
+		self.reset_attack_landed()
+
+		if self.run_right_animation:	
+			self.reset_neg_vel()
+			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
+			self.current_sprite += 0.4
+			if int(self.current_sprite) >= len(self.run_right_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] <= 290:
+				self.neg_vel = 0 
+				self.run_right_animation = False 
+				self.attack_animation = True 
+			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+
+		if self.attack_animation:
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.attack_right_sprites):
+				self.current_sprite = 0
+				self.attack_animation = False 
+				self.run_left_animation = True   
+				self.attack_landed = True  
+			self.image = self.attack_right_sprites[int(self.current_sprite)]
+
+
+		if self.run_left_animation:
+			self.reset_vel()
+			self.current_sprite += 0.4
+			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by negative velocity so it moves right on x axis.
+			if int(self.current_sprite) >= len(self.run_left_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] >= 950:
+				self.neg_vel = 0 
+				self.run_left_animation = False
+				self.attack_done = True 
+				self.start_idle()
+			self.image = self.run_left_sprites[int(self.current_sprite)]	
+
+		if self.hit_animation:
+			self.current_sprite += 0.15
+			if int(self.current_sprite) >= len(self.take_hit_right_sprites):
+				self.current_sprite = 0
+				self.hit_animation = False 
+				self.idle_animation = True    
+			self.image = self.take_hit_right_sprites[int(self.current_sprite)]
+
+		if self.death_animation:
+			self.current_sprite += 0.25
+			if int(self.current_sprite) >= len(self.death_right_sprites):
+				self.current_sprite = 0
+				self.death_animation = False 
+			self.image = self.death_right_sprites[int(self.current_sprite)]
+
+		if self.idle_animation:
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.idle_right_sprites):
+				self.current_sprite = 0
+
+			self.image = self.idle_right_sprites[int(self.current_sprite)]
+
+# Nimbus 
+class EnemyMeleeChampionNine(Champion, pygame.sprite.Sprite):
+	def __init__(self):
+		Champion.__init__(self, "Nimbus", "Dark", 310, 280, "Fire", "Air", "Cave")
+		pygame.sprite.Sprite.__init__(self) 
+
+		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Nimbus/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Nimbus/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Nimbus/run_left_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Nimbus/run_left_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Nimbus/run_left_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Nimbus/run_left_6.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.run_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Nimbus/run_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Nimbus/run_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Nimbus/run_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Nimbus/run_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Nimbus/run_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Nimbus/run_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.idle_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Nimbus/idle_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Nimbus/idle_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Nimbus/idle_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Nimbus/idle_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height))] 
+
+		self.attack_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_12.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_13.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_14.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_15.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_16.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_16.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_18.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_19.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.ut_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_12.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_13.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_14.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_15.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_16.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_16.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_18.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_19.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.take_hit_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Nimbus/idle_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Nimbus/idle_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Nimbus/idle_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Nimbus/idle_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.death_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Nimbus/death_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Nimbus/death_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Nimbus/death_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Nimbus/death_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Nimbus/death_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.current_sprite = 0
+		self.image = self.run_left_sprites[self.current_sprite]
+		self.rect = self.image.get_rect()
+		self.rect.center = [980, 340] # Position of player 
+		self.moving = pygame.Rect(180,355,400,450)
+
+		self.vel = 16
+		self.neg_vel = -16 
+
+	def reset_vel(self):
+		self.vel = 16 
+
+	def reset_neg_vel(self):
+		self.neg_vel = -16
+
+	def update(self):
+		self.advanced_health()
+		self.advanced_energy()
+		self.reset_attack()
+		self.reset_attack_landed()
+
+		if self.run_right_animation:	
+			self.reset_neg_vel()
+			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
+			self.current_sprite += 0.4
+			if int(self.current_sprite) >= len(self.run_right_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] <= 290:
+				self.neg_vel = 0 
+				self.run_right_animation = False 
+				self.attack_animation = True 
+			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+
+		if self.attack_animation:
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.attack_right_sprites):
+				self.current_sprite = 0
+				self.attack_animation = False 
+				self.run_left_animation = True   
+				self.attack_landed = True  
+			self.image = self.attack_right_sprites[int(self.current_sprite)]
+
+
+		if self.run_left_animation:
+			self.reset_vel()
+			self.current_sprite += 0.4
+			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by negative velocity so it moves right on x axis.
+			if int(self.current_sprite) >= len(self.run_left_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] >= 950:
+				self.neg_vel = 0 
+				self.run_left_animation = False
+				self.attack_done = True 
+				self.start_idle()
+			self.image = self.run_left_sprites[int(self.current_sprite)]	
+
+		if self.hit_animation:
+			self.current_sprite += 0.15
+			if int(self.current_sprite) >= len(self.take_hit_right_sprites):
+				self.current_sprite = 0
+				self.hit_animation = False 
+				self.idle_animation = True    
+			self.image = self.take_hit_right_sprites[int(self.current_sprite)]
+
+		if self.death_animation:
+			self.current_sprite += 0.25
+			if int(self.current_sprite) >= len(self.death_right_sprites):
+				self.current_sprite = 0
+				self.death_animation = False 
+			self.image = self.death_right_sprites[int(self.current_sprite)]
+
+		if self.idle_animation:
+			self.current_sprite += 0.25 
+			if int(self.current_sprite) >= len(self.idle_right_sprites):
+				self.current_sprite = 0
+
+			self.image = self.idle_right_sprites[int(self.current_sprite)]
+
+# Noburo
+class EnemyMeleeChampionTen(Champion, pygame.sprite.Sprite):
+	def __init__(self):
+		Champion.__init__(self, "Noburo", "Air", 840, 720, "Fire", "Water", "Desert")
+		pygame.sprite.Sprite.__init__(self) 
+
+		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Noburo/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Noburo/run_left_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/run_left_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Noburo/run_left_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/run_left_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Noburo/run_left_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/run_left_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.run_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Noburo/run_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/run_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Noburo/run_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/run_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Noburo/run_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/run_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Noburo/run_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/run_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.idle_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Noburo/idle_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/idle_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Noburo/idle_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/idle_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height))] 
+
+		self.attack_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Noburo/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Noburo/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Noburo/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Noburo/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.ult_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Noburo/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Noburo/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Noburo/ult_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Noburo/ult_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.take_hit_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Noburo/take_hit_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/take_hit_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Noburo/take_hit_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.death_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Noburo/death_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/death_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Noburo/death_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/death_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Noburo/death_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/death_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Noburo/death_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+
+		self.current_sprite = 0
+		self.image = self.run_left_sprites[self.current_sprite]
+		self.rect = self.image.get_rect()
+		self.rect.center = [980, 360] # Position of player 
+		self.moving = pygame.Rect(180,355,400,450)
+
+		self.vel = 16
+		self.neg_vel = -16 
+
+	def reset_vel(self):
+		self.vel = 16 
+
+	def reset_neg_vel(self):
+		self.neg_vel = -16
+
+	def update(self):
+		self.advanced_health()
+		self.advanced_energy()
+		self.reset_attack()
+		self.reset_attack_landed()
+
+		if self.run_right_animation:	
+			self.reset_neg_vel()
+			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
+			self.current_sprite += 0.4
+			if int(self.current_sprite) >= len(self.run_right_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] <= 290:
+				self.neg_vel = 0 
+				self.run_right_animation = False 
+				self.attack_animation = True 
+			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+
+		if self.attack_animation:
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.attack_right_sprites):
+				self.current_sprite = 0
+				self.attack_animation = False 
+				self.run_left_animation = True   
+				self.attack_landed = True  
+			self.image = self.attack_right_sprites[int(self.current_sprite)]
+
+
+		if self.run_left_animation:
+			self.reset_vel()
+			self.current_sprite += 0.4
+			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by negative velocity so it moves right on x axis.
+			if int(self.current_sprite) >= len(self.run_left_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] >= 950:
+				self.neg_vel = 0 
+				self.run_left_animation = False
+				self.attack_done = True 
+				self.start_idle()
+			self.image = self.run_left_sprites[int(self.current_sprite)]	
+
+		if self.hit_animation:
+			self.current_sprite += 0.15
+			if int(self.current_sprite) >= len(self.take_hit_right_sprites):
+				self.current_sprite = 0
+				self.hit_animation = False 
+				self.idle_animation = True    
+			self.image = self.take_hit_right_sprites[int(self.current_sprite)]
+
+		if self.death_animation:
+			self.current_sprite += 0.25
+			if int(self.current_sprite) >= len(self.death_right_sprites):
+				self.current_sprite = 0
+				self.death_animation = False 
+			self.image = self.death_right_sprites[int(self.current_sprite)]
+
+		if self.idle_animation:
+			self.current_sprite += 0.25 
+			if int(self.current_sprite) >= len(self.idle_right_sprites):
+				self.current_sprite = 0
+
+			self.image = self.idle_right_sprites[int(self.current_sprite)]
+
+# Yahiro 
+class EnemyMeleeChampionEleven(Champion, pygame.sprite.Sprite):
+	def __init__(self):
+		Champion.__init__(self, "Yahiro", "Dark", 850, 770, "Fire", "Water", "Cave")
+		pygame.sprite.Sprite.__init__(self) 
+
+		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Yahiro/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Yahiro/run_left_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/run_left_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Yahiro/run_left_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/run_left_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Yahiro/run_left_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/run_left_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.run_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Yahiro/run_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/run_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Yahiro/run_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/run_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Yahiro/run_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/run_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Yahiro/run_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/run_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.idle_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Yahiro/idle_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/idle_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Yahiro/idle_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/idle_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height))] 
+
+		self.attack_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Yahiro/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Yahiro/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Yahiro/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Yahiro/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Yahiro/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Yahiro/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.ut_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Yahiro/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Yahiro/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Yahiro/ult_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Yahiro/ult_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Yahiro/ult_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Yahiro/ult_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.take_hit_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Yahiro/take_hit_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/take_hit_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Yahiro/take_hit_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/take_hit_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+		self.death_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Yahiro/death_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/death_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("champions/Yahiro/death_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/death_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("champions/Yahiro/death_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/death_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
+
+		self.current_sprite = 0
+		self.image = self.run_left_sprites[self.current_sprite]
+		self.rect = self.image.get_rect()
+		self.rect.center = [980, 375] # Position of player 
+		self.moving = pygame.Rect(180,355,400,450)
+
+		self.vel = 16
+		self.neg_vel = -16 
+
+
+	def reset_vel(self):
+		self.vel = 16 
+
+	def reset_neg_vel(self):
+		self.neg_vel = -16
+
+	def update(self):
+		self.advanced_health()
+		self.advanced_energy()
+		self.reset_attack()
+		self.reset_attack_landed()
+
+		if self.run_right_animation:	
+			self.reset_neg_vel()
+			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
+			self.current_sprite += 0.4
+			if int(self.current_sprite) >= len(self.run_right_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] <= 300:
+				self.neg_vel = 0 
+				self.run_right_animation = False 
+				self.attack_animation = True 
+			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+
+		if self.attack_animation:
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.attack_right_sprites):
+				self.current_sprite = 0
+				self.attack_animation = False 
+				self.run_left_animation = True   
+				self.attack_landed = True  
+			self.image = self.attack_right_sprites[int(self.current_sprite)]
+
+
+		if self.run_left_animation:
+			self.reset_vel()
+			self.current_sprite += 0.4
+			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by negative velocity so it moves right on x axis.
+			if int(self.current_sprite) >= len(self.run_left_sprites):
+				self.current_sprite = 0
+			if self.rect.center[0] >= 950:
+				self.neg_vel = 0 
+				self.run_left_animation = False
+				self.attack_done = True 
+				self.start_idle()
+			self.image = self.run_left_sprites[int(self.current_sprite)]	
+
+		if self.hit_animation:
+			self.current_sprite += 0.15
+			if int(self.current_sprite) >= len(self.take_hit_right_sprites):
+				self.current_sprite = 0
+				self.hit_animation = False 
+				self.idle_animation = True    
+			self.image = self.take_hit_right_sprites[int(self.current_sprite)]
+
+		if self.death_animation:
+			self.current_sprite += 0.25
+			if int(self.current_sprite) >= len(self.death_right_sprites):
+				self.current_sprite = 0
+				self.death_animation = False 
+			self.image = self.death_right_sprites[int(self.current_sprite)]
+
+		if self.idle_animation:
+			self.current_sprite += 0.25 
+			if int(self.current_sprite) >= len(self.idle_right_sprites):
+				self.current_sprite = 0
+
+			self.image = self.idle_right_sprites[int(self.current_sprite)]
+
