@@ -2,8 +2,12 @@ import socket
 from _thread import *
 import pickle
 from game import Game
-                     
-server = "IPV4"   
+                    
+'''
+The server is the brain of the online game. Here information are collected from multiple clients. 
+For every two active clients a game is created. 
+'''
+server = "SET_IPv4_HERE"  
 port = 5556
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -20,13 +24,7 @@ connected = set()
 games = {}
 idCount = 0
 
-player_champions = ["RangeChampionOne", "MeleeChampionOne", "MeleeChampionTwo", "MeleeChampionThree", "EnemyMeleeChampionOne"]
 moves = ["Rock", "Paper", "Scissors", "rock", "paper", "scissors", "ROCK", "PAPER", "SCISSORS"]
-data_types = ["reset", "get"]
-
-
-
-
 
 def threaded_client(conn, p, gameId):
     global idCount
@@ -44,27 +42,34 @@ def threaded_client(conn, p, gameId):
                 if not data:
                     break
                 else:
-                    if p == 0: 
+                    if p == 0:  # Get the data after the register word. The data should be the champions class name on a string form 
                         if data.split(" ")[0] == "register":
                             split_data = data.split(" ")
                             split_data.pop(0) 
-                            x = ''.join(str(v) for v in split_data)
+                            x = ''.join(str(v) for v in split_data) # Connect all words to form properlly the name of the class 
                             game.set_champions(p, x)
 
                     if p == 1: 
                         if data.split(" ")[0] == "register":
                             split_data = data.split(" ")
                             split_data.pop(0) 
-                            x = ''.join(str(v) for v in split_data)
+                            x = ''.join(str(v) for v in split_data) # Ensure that all parts of the object name are 
                             game.set_champions(p, x)
-
-                    if data == "reset":
+                    # Reset all play moves and as a result the game 
+                    if data == "reset": 
                         game.resetWent()
+                    # Register the move of each player 
                     if data != "get" and data in moves:
-                        game.play(p, data)
-                    if data not in data_types and data in player_champions: 
-                        game.set_champions(p, data) 
-                    
+                        game.play(p, data)   
+
+                    # Send to the clients data about the state of each players animation 
+                    if data == "pla_att_anim":
+                        game.pla_att_anim()
+                    if data == "sto_att_anim":
+                        game.sto_att_anim() 
+
+                    if data == "reset_buttons":
+                        game.reset_buttons() 
 
 
                     conn.sendall(pickle.dumps(game))
@@ -85,7 +90,7 @@ def threaded_client(conn, p, gameId):
 while True:
     conn, addr = s.accept()
     print("Connected to:", addr)
-
+    # For every connection of two create a new room/ game 
     idCount += 1
     p = 0
     gameId = (idCount - 1)//2
@@ -98,3 +103,4 @@ while True:
 
 
     start_new_thread(threaded_client, (conn, p, gameId)) 
+    
