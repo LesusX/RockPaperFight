@@ -104,7 +104,7 @@ def main_menu_x(pl):
     global energy_attack_ready 
     global enemy_energy_attack_ready
     # ------ Start the music only when the game is ready --------------------
-    my_sound = pygame.mixer.Sound('bg_sound.mp3')
+    my_sound = pygame.mixer.Sound('sounds/bg_sound.mp3')
     my_sound.play()
     music_volume = 0.1
 
