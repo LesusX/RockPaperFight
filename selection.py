@@ -11,12 +11,17 @@ pygame.init()
 SCREEN = pygame.display.set_mode((1200, 720))
 pygame.display.set_caption("Champion Selection")
 
+
+'''
+Get the clicked chamion and save it temporarelly in a list. 
+If a new champ is selected clear the list. The champion selector is going to take care of more complex functionalities in the future.
+ex. The colors, pictures, animations and position of every object. 
+'''
 class ChampionSelector:
     def __init__(self):
         self.selected_champion = []
         self.is_locked = False 
-        
-
+    
     def champion_selection(self, clicked_champion):
         self.selected_champion.clear()
         self.selected_champion.append(clicked_champion)
@@ -42,6 +47,7 @@ BACKGROUND_COLOR = '#0d0e2e'
 LIGHT_GRAY = '#ff3300' 
 GRAY = '#33cc33'
 
+# -------- Button Highlights ----------------    # TODO: Merge button and highlight to save lines from the code 
 button1 = Button(' ',100, 100,(120, 110),3)
 button2 = Button(' ',100, 100,(235, 110),3)
 button3 = Button(' ',100, 100,(350, 110),3)
@@ -67,6 +73,7 @@ def selector():
         SCREEN.blit(BG_FONT, (0, 0))
         SCREEN.blit(BG, (50, 10))
         
+        # Get all information of a selected champion and prepare it for blit. 
         show_info = shown_champion[0]()
         SCREEN.blit(pygame.transform.scale(pygame.image.load(f"assets/{show_info.name}.png").convert_alpha(), (120, 120)), (700, 280))
         info_name = font.render( str(f"{show_info.name}"), True, (255, 255, 255)) 
