@@ -5,49 +5,49 @@ class Champion:
 	def __init__(self, name, element, sprite_width, sprite_height, weakness, strong_against, arena_bonus):
 		# ---------------- Animation parameters ----------------------
 		self.ultimate_attack_animation = False 
-		self.ult_attack_animation = False
 		self.run_right_animation = False 
 		self.run_left_animation = False 
 		self.attack_animation = False
-		self.death_animation = False 
 		self.idle_animation = False
 		self.take_hit_left = False 
-		self.hit_animation = False 		 
 		self.death_left = False 
 		self.ul_attack = False  		
-		self.neg_vel = -16 
 		self.vel = 16
+		self.neg_vel = -16
+		self.death_animation = False 
+		self.hit_animation = False 
+		self.ult_attack_animation = False
+		 
 		# Generic stat parameters 
-		self.strong_against = strong_against 
-		self.sprite_height = sprite_height 
-		self.sprite_width = sprite_width
-		self.arena_bonus = arena_bonus
-		self.attack_landed = False 
-		self.death_ani_end = False 
-		self.weakness = weakness 
-		self.attack_damage = 100
-		self.attack_done = False 
+		self.name = name 
 		self.element = element
-		self.power_up = False 
+		self.weakness = weakness 
+		self.strong_against = strong_against 
+		self.sprite_width = sprite_width
+		self.sprite_height = sprite_height 
+		self.arena_bonus = arena_bonus
+		self.attack_damage = 100
 		self.attack = False 
 		self.heal = False 
-		self.name = name 
+		self.power_up = False 
+		self.attack_done = False 
+		self.attack_landed = False 
+		self.death_ani_end = False 
 		# Healthbar parameters 
-		self.health_ratio = self.max_health / self.health_bar_length
-		self.health_bar_length = 300
-		self.health_change_speed = 5
 		self.current_health = 1000
 		self.target_health = 1000 
 		self.max_health = 1000
+		self.health_bar_length = 300
+		self.health_ratio = self.max_health / self.health_bar_length
+		self.health_change_speed = 5
 		# Energybar parameters 
-		self.energy_ratio = self.max_energy / self.energy_bar_length
-		self.energy_bar_length = 300
-		self.energy_change_speed = 5
+		self.energy = 100
 		self.current_energy = 100
 		self.target_energy = 100 
 		self.max_energy = 1000
-		self.energy = 100
-
+		self.energy_bar_length = 300
+		self.energy_ratio = self.max_energy / self.energy_bar_length
+		self.energy_change_speed = 5
 
 	# ------------  Animation related functions ----------------------------------
 	def start_running_with_ult(self):
@@ -381,7 +381,6 @@ class MeleeChampionTwo(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("champions/Casandra/death_left_13.png").convert_alpha(), (self.sprite_width, self.sprite_height)),pygame.transform.scale(pygame.image.load("champions/Casandra/death_left_14.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("champions/Casandra/death_left_15.png").convert_alpha(), (self.sprite_width, self.sprite_height)),pygame.transform.scale(pygame.image.load("champions/Casandra/death_left_16.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-
 		# These atributes can be moved up on the main Chamion class once there are spritesheets used instead of simple sprites 
 		self.current_sprite = 0
 		self.image = self.run_left_sprites[self.current_sprite]
@@ -528,6 +527,7 @@ class MeleeChampionThree(Champion, pygame.sprite.Sprite):
 		self.image = self.attack_left_sprites[self.current_sprite]
 		self.rect = self.image.get_rect()
 		self.rect.center = [180,150] # Fixed position of player 
+
 
 	def update(self):
 		self.advanced_health()
@@ -1040,6 +1040,7 @@ class MeleeChampionSeven(Champion, pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.center = [180,325] # Fixed position of player 
 
+
 	def update(self):
 		self.advanced_health()
 		self.advanced_energy()
@@ -1408,7 +1409,6 @@ class MeleeChampionTen(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("champions/Noburo/death_left_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/death_left_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("champions/Noburo/death_left_7.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-
 		self.current_sprite = 0
 		self.image = self.attack_left_sprites[self.current_sprite]
 		self.rect = self.image.get_rect()
@@ -1527,6 +1527,7 @@ class MeleeChampionEleven(Champion, pygame.sprite.Sprite):
 		self.death_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Yahiro/death_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/death_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("champions/Yahiro/death_left_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/death_left_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("champions/Yahiro/death_left_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/death_left_6.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
 
 		self.current_sprite = 0
 		self.image = self.attack_left_sprites[self.current_sprite]
