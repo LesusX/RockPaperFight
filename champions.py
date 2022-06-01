@@ -5,50 +5,49 @@ class Champion:
 	def __init__(self, name, element, sprite_width, sprite_height, weakness, strong_against, arena_bonus):
 		# ---------------- Animation parameters ----------------------
 		self.ultimate_attack_animation = False 
+		self.ult_attack_animation = False
 		self.run_right_animation = False 
 		self.run_left_animation = False 
 		self.attack_animation = False
+		self.death_animation = False 
 		self.idle_animation = False
 		self.take_hit_left = False 
+		self.hit_animation = False 		 
 		self.death_left = False 
 		self.ul_attack = False  		
-		
-		self.death_animation = False 
-		self.hit_animation = False 
-		self.ult_attack_animation = False
-		 
+		self.neg_vel = -16 
+		self.vel = 16
 		# Generic stat parameters 
-		self.name = name 
-		self.element = element
-		self.weakness = weakness 
 		self.strong_against = strong_against 
-		self.sprite_width = sprite_width
 		self.sprite_height = sprite_height 
+		self.sprite_width = sprite_width
 		self.arena_bonus = arena_bonus
-		self.max_health = 100 
-		self.health = 100 
-		self.energy = 100 
-		self.attack_damage = 10
-		self.attack = False 
-		self.heal = False 
-		self.power_up = False 
-		self.attack_done = False 
 		self.attack_landed = False 
 		self.death_ani_end = False 
+		self.weakness = weakness 
+		self.attack_damage = 100
+		self.attack_done = False 
+		self.element = element
+		self.power_up = False 
+		self.attack = False 
+		self.heal = False 
+		self.name = name 
 		# Healthbar parameters 
+		self.health_ratio = self.max_health / self.health_bar_length
+		self.health_bar_length = 300
+		self.health_change_speed = 5
 		self.current_health = 1000
 		self.target_health = 1000 
 		self.max_health = 1000
-		self.health_bar_length = 300
-		self.health_ratio = self.max_health / self.health_bar_length
-		self.health_change_speed = 5
 		# Energybar parameters 
+		self.energy_ratio = self.max_energy / self.energy_bar_length
+		self.energy_bar_length = 300
+		self.energy_change_speed = 5
 		self.current_energy = 100
 		self.target_energy = 100 
 		self.max_energy = 1000
-		self.energy_bar_length = 300
-		self.energy_ratio = self.max_energy / self.energy_bar_length
-		self.energy_change_speed = 5
+		self.energy = 100
+
 
 	# ------------  Animation related functions ----------------------------------
 	def start_running_with_ult(self):
@@ -77,19 +76,31 @@ class Champion:
 	def reset_attack_landed(self):
 		self.attack_landed = False 
 
+# TODO: Combine the two functions below in one and let it be inherited by the main Champion class
+	def reset_vel(self):  
+		self.vel = 12 
+	def reset_neg_vel(self):
+		self.neg_vel = -12  
 	# --------- Stat realated functions --------------------------------
 	def get_energy(self,amount):
 		if self.target_energy < self.max_energy:
 			self.target_energy += amount
-			self.energy += amount
+			self.energy += amount      
 		if self.target_energy > self.max_energy:
 			self.target_energy = self.max_energy
-			
+			self.energy = self.max_energy
+
 	def lose_energy(self,amount):
 		if self.target_energy > 0:
 			self.target_energy -= amount
+			self.energy -= amount 
 		if self.target_energy < 0:
+			self.energy = 0 
 			self.target_energy = 0
+
+	def reseT_energy(self):
+		self.energy = 100
+		self.target_energy = 100 
 
 	def advanced_energy(self):
 		transition_width = 0
@@ -172,17 +183,6 @@ class Champion:
 			self.attack_damage -= arena_bonus_damage            
 			return self.health, self.attack_damage
 
-	# The heal function lets the champion gain 10HP if it is allowed. 
-	# In future version of the game stuns may block healing. 
-	def heal_self(self, can_heal=False):
-		self.heal = can_heal
-		if self.heal and self.health <= (self.max_health - 10):
-			self.health += 10 
-			self.heal = False 
-		elif self.heal and self.health > (self.max_health - 10):
-			self.heal = False 
-			return str(f"You can't heal now. Health: {self.health}")
-
 	def champion_information(self):
 		return (f"\n{self.name} is clicked! \n{self.information}")
 
@@ -241,15 +241,6 @@ class MeleeChampionOne(Champion, pygame.sprite.Sprite):
 		self.image = self.attack_left_sprites[self.current_sprite]
 		self.rect = self.image.get_rect()
 		self.rect.center = [175, 200] # Fixed position of player 
-		self.vel = 12
-		self.neg_vel = -12 
-
-# TODO: Combine the two functions below in one and let it be inherited by the main Champion class
-	def reset_vel(self):  
-		self.vel = 12 
-	def reset_neg_vel(self):
-		self.neg_vel = -12  
-
 
 	def update(self):
 		self.advanced_health()
@@ -283,13 +274,16 @@ class MeleeChampionOne(Champion, pygame.sprite.Sprite):
 			self.image = self.attack_left_sprites[int(self.current_sprite)]
 
 		if self.ultimate_attack_animation:
+			self.attack_damage += 15 
 			self.current_sprite += 0.3
 			if int(self.current_sprite) >= len(self.ut_left_sprites):
 				self.current_sprite = 0
 				self.ultimate_attack_animation = False 
 				self.run_right_animation = True    
 				self.attack_landed = True 
-				self.ul_attack = False 
+				self.ul_attack = False
+				self.attack_damage -= 15  
+				self.reseT_energy()
 			self.image = self.ut_left_sprites[int(self.current_sprite)]
 
 		if self.run_right_animation:
@@ -393,13 +387,6 @@ class MeleeChampionTwo(Champion, pygame.sprite.Sprite):
 		self.image = self.run_left_sprites[self.current_sprite]
 		self.rect = self.image.get_rect()
 		self.rect.center = [160, 120] # Fixed position of player.
-		self.vel = 17
-		self.neg_vel = -17
-
-	def reset_vel(self):
-		self.vel = 15 
-	def reset_neg_vel(self):
-		self.neg_vel = -15 
 
 	def update(self):
 		self.advanced_health()
@@ -413,20 +400,37 @@ class MeleeChampionTwo(Champion, pygame.sprite.Sprite):
 			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_left_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] >= 800:
+			if self.rect.center[0] >= 800 and not self.ul_attack:
 				self.vel = 0 
 				self.run_left_animation = False 
-				self.attack_animation = True    
+				self.attack_animation = True 
+			if self.rect.center[0] >= 790 and self.ul_attack:
+				self.vel = 0 
+				self.run_left_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_left_sprites[int(self.current_sprite)]
 
 		if self.attack_animation:
-			self.current_sprite += 0.35 
+			self.current_sprite += 0.25
 			if int(self.current_sprite) >= len(self.attack_left_sprites):
 				self.current_sprite = 0
 				self.attack_animation = False 
 				self.run_right_animation = True    
 				self.attack_landed = True 
 			self.image = self.attack_left_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15 
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ut_left_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_right_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False
+				self.attack_damage -= 15  
+				self.reseT_energy()
+			self.image = self.ut_left_sprites[int(self.current_sprite)]
 
 		if self.run_right_animation:
 			self.reset_neg_vel()
@@ -524,14 +528,6 @@ class MeleeChampionThree(Champion, pygame.sprite.Sprite):
 		self.image = self.attack_left_sprites[self.current_sprite]
 		self.rect = self.image.get_rect()
 		self.rect.center = [180,150] # Fixed position of player 
-		self.vel = 15
-		self.neg_vel = -15 
-
-	def reset_vel(self):
-		self.vel = 15 
-	
-	def reset_neg_vel(self):
-		self.neg_vel = -15  
 
 	def update(self):
 		self.advanced_health()
@@ -542,23 +538,40 @@ class MeleeChampionThree(Champion, pygame.sprite.Sprite):
 		if self.run_left_animation:
 			self.reset_vel()
 			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
-			self.current_sprite += 0.45
+			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_left_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] >= 800:
+			if self.rect.center[0] >= 800 and not self.ul_attack:
 				self.vel = 0 
 				self.run_left_animation = False 
-				self.attack_animation = True    
+				self.attack_animation = True 
+			if self.rect.center[0] >= 790 and self.ul_attack:
+				self.vel = 0 
+				self.run_left_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_left_sprites[int(self.current_sprite)]
 
 		if self.attack_animation:
-			self.current_sprite += 0.2
+			self.current_sprite += 0.25
 			if int(self.current_sprite) >= len(self.attack_left_sprites):
 				self.current_sprite = 0
 				self.attack_animation = False 
 				self.run_right_animation = True    
 				self.attack_landed = True 
 			self.image = self.attack_left_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15 
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ut_left_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_right_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False
+				self.attack_damage -= 15  
+				self.reseT_energy()
+			self.image = self.ut_left_sprites[int(self.current_sprite)]
 
 		if self.run_right_animation:
 			self.reset_neg_vel()
@@ -598,7 +611,7 @@ class MeleeChampionThree(Champion, pygame.sprite.Sprite):
 # Norwin 
 class MeleeChampionFour(Champion, pygame.sprite.Sprite):
 	def __init__(self):
-		Champion.__init__(self, "Norwin", "Air", 1100, 590, "Fire", "Water", "Desert")
+		Champion.__init__(self, "Norwin", "Air", 1100, 620, "Fire", "Water", "Desert")
 		pygame.sprite.Sprite.__init__(self) 
 
 		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Norwin/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
@@ -639,18 +652,11 @@ class MeleeChampionFour(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("champions/Norwin/death_left_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/death_left_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("champions/Norwin/death_left_11.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-
 		self.current_sprite = 0
 		self.image = self.attack_left_sprites[self.current_sprite]
 		self.rect = self.image.get_rect()
 		self.rect.center = [180,150] # Fixed position of player 
-		self.vel = 16
-		self.neg_vel = -16 
 
-	def reset_vel(self):
-		self.vel = 16
-	def reset_neg_vel(self):
-		self.neg_vel = -16  
 
 	def update(self):
 		self.advanced_health()
@@ -658,26 +664,44 @@ class MeleeChampionFour(Champion, pygame.sprite.Sprite):
 		self.reset_attack()
 		self.reset_attack_landed()
 
+
 		if self.run_left_animation:
 			self.reset_vel()
 			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
-			self.current_sprite += 0.5
+			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_left_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] >= 800:
+			if self.rect.center[0] >= 800 and not self.ul_attack:
 				self.vel = 0 
 				self.run_left_animation = False 
-				self.attack_animation = True    
+				self.attack_animation = True 
+			if self.rect.center[0] >= 790 and self.ul_attack:
+				self.vel = 0 
+				self.run_left_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_left_sprites[int(self.current_sprite)]
 
 		if self.attack_animation:
-			self.current_sprite += 0.2
+			self.current_sprite += 0.25
 			if int(self.current_sprite) >= len(self.attack_left_sprites):
 				self.current_sprite = 0
 				self.attack_animation = False 
 				self.run_right_animation = True    
 				self.attack_landed = True 
 			self.image = self.attack_left_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15 
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ut_left_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_right_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False
+				self.attack_damage -= 15  
+				self.reseT_energy()
+			self.image = self.ut_left_sprites[int(self.current_sprite)]
 
 		if self.run_right_animation:
 			self.reset_neg_vel()
@@ -754,21 +778,10 @@ class MeleeChampionFive(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("champions/Hassaron/death_left_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Hassaron/death_left_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("champions/Hassaron/death_left_7.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-
 		self.current_sprite = 0
 		self.image = self.attack_left_sprites[self.current_sprite]
 		self.rect = self.image.get_rect()
 		self.rect.center = [180,320] # Fixed position of player 
-
-		self.vel = 16
-		self.neg_vel = -16 
-
-
-	def reset_vel(self):
-		self.vel = 16
-	
-	def reset_neg_vel(self):
-		self.neg_vel = -16  
 
 	def update(self):
 		self.advanced_health()
@@ -779,23 +792,40 @@ class MeleeChampionFive(Champion, pygame.sprite.Sprite):
 		if self.run_left_animation:
 			self.reset_vel()
 			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
-			self.current_sprite += 0.5
+			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_left_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] >= 800:
+			if self.rect.center[0] >= 800 and not self.ul_attack:
 				self.vel = 0 
 				self.run_left_animation = False 
-				self.attack_animation = True    
+				self.attack_animation = True 
+			if self.rect.center[0] >= 790 and self.ul_attack:
+				self.vel = 0 
+				self.run_left_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_left_sprites[int(self.current_sprite)]
 
 		if self.attack_animation:
-			self.current_sprite += 0.2
+			self.current_sprite += 0.25
 			if int(self.current_sprite) >= len(self.attack_left_sprites):
 				self.current_sprite = 0
 				self.attack_animation = False 
 				self.run_right_animation = True    
 				self.attack_landed = True 
 			self.image = self.attack_left_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15 
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ut_left_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_right_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False
+				self.attack_damage -= 15  
+				self.reseT_energy()
+			self.image = self.ut_left_sprites[int(self.current_sprite)]
 
 		if self.run_right_animation:
 			self.reset_neg_vel()
@@ -888,16 +918,6 @@ class MeleeChampionSix(Champion, pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.center = [180,320] # Fixed position of player 
 
-		self.vel = 16
-		self.neg_vel = -16 
-
-
-	def reset_vel(self):
-		self.vel = 17
-	
-	def reset_neg_vel(self):
-		self.neg_vel = -17  
-
 	def update(self):
 		self.advanced_health()
 		self.advanced_energy()
@@ -907,23 +927,40 @@ class MeleeChampionSix(Champion, pygame.sprite.Sprite):
 		if self.run_left_animation:
 			self.reset_vel()
 			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
-			self.current_sprite += 0.4
+			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_left_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] >= 800:
+			if self.rect.center[0] >= 800 and not self.ul_attack:
 				self.vel = 0 
 				self.run_left_animation = False 
-				self.attack_animation = True    
+				self.attack_animation = True 
+			if self.rect.center[0] >= 790 and self.ul_attack:
+				self.vel = 0 
+				self.run_left_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_left_sprites[int(self.current_sprite)]
 
 		if self.attack_animation:
-			self.current_sprite += 0.3
+			self.current_sprite += 0.25
 			if int(self.current_sprite) >= len(self.attack_left_sprites):
 				self.current_sprite = 0
 				self.attack_animation = False 
 				self.run_right_animation = True    
 				self.attack_landed = True 
 			self.image = self.attack_left_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15 
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ut_left_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_right_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False
+				self.attack_damage -= 15  
+				self.reseT_energy()
+			self.image = self.ut_left_sprites[int(self.current_sprite)]
 
 		if self.run_right_animation:
 			self.reset_neg_vel()
@@ -1003,16 +1040,6 @@ class MeleeChampionSeven(Champion, pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.center = [180,325] # Fixed position of player 
 
-		self.vel = 16
-		self.neg_vel = -16 
-
-
-	def reset_vel(self):
-		self.vel = 17
-	
-	def reset_neg_vel(self):
-		self.neg_vel = -17  
-
 	def update(self):
 		self.advanced_health()
 		self.advanced_energy()
@@ -1022,23 +1049,40 @@ class MeleeChampionSeven(Champion, pygame.sprite.Sprite):
 		if self.run_left_animation:
 			self.reset_vel()
 			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
-			self.current_sprite += 0.4
+			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_left_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] >= 800:
+			if self.rect.center[0] >= 800 and not self.ul_attack:
 				self.vel = 0 
 				self.run_left_animation = False 
-				self.attack_animation = True    
+				self.attack_animation = True 
+			if self.rect.center[0] >= 790 and self.ul_attack:
+				self.vel = 0 
+				self.run_left_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_left_sprites[int(self.current_sprite)]
 
 		if self.attack_animation:
-			self.current_sprite += 0.3
+			self.current_sprite += 0.25
 			if int(self.current_sprite) >= len(self.attack_left_sprites):
 				self.current_sprite = 0
 				self.attack_animation = False 
 				self.run_right_animation = True    
 				self.attack_landed = True 
 			self.image = self.attack_left_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15 
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ut_left_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_right_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False
+				self.attack_damage -= 15  
+				self.reseT_energy()
+			self.image = self.ut_left_sprites[int(self.current_sprite)]
 
 		if self.run_right_animation:
 			self.reset_neg_vel()
@@ -1079,7 +1123,7 @@ class MeleeChampionSeven(Champion, pygame.sprite.Sprite):
 # Lambert 
 class MeleeChampionEight(Champion, pygame.sprite.Sprite):
 	def __init__(self):
-		Champion.__init__(self, "Lambert", "Dark", 520, 450, "Fire", "Air", "Cave")
+		Champion.__init__(self, "Lambert", "Dark", 520, 450, "Fire", "Air", "Ice")
 		pygame.sprite.Sprite.__init__(self) 
 
 		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Lambert/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
@@ -1119,15 +1163,6 @@ class MeleeChampionEight(Champion, pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.center = [180,350] # Fixed position of player 
 
-		self.vel = 16
-		self.neg_vel = -16 
-
-
-	def reset_vel(self):
-		self.vel = 17
-	
-	def reset_neg_vel(self):
-		self.neg_vel = -17  
 
 	def update(self):
 		self.advanced_health()
@@ -1138,23 +1173,40 @@ class MeleeChampionEight(Champion, pygame.sprite.Sprite):
 		if self.run_left_animation:
 			self.reset_vel()
 			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
-			self.current_sprite += 0.4
+			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_left_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] >= 800:
+			if self.rect.center[0] >= 800 and not self.ul_attack:
 				self.vel = 0 
 				self.run_left_animation = False 
-				self.attack_animation = True    
+				self.attack_animation = True 
+			if self.rect.center[0] >= 790 and self.ul_attack:
+				self.vel = 0 
+				self.run_left_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_left_sprites[int(self.current_sprite)]
 
 		if self.attack_animation:
-			self.current_sprite += 0.3
+			self.current_sprite += 0.25
 			if int(self.current_sprite) >= len(self.attack_left_sprites):
 				self.current_sprite = 0
 				self.attack_animation = False 
 				self.run_right_animation = True    
 				self.attack_landed = True 
 			self.image = self.attack_left_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15 
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ut_left_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_right_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False
+				self.attack_damage -= 15  
+				self.reseT_energy()
+			self.image = self.ut_left_sprites[int(self.current_sprite)]
 
 		if self.run_right_animation:
 			self.reset_neg_vel()
@@ -1242,13 +1294,6 @@ class MeleeChampionNine(Champion, pygame.sprite.Sprite):
 		self.image = self.attack_left_sprites[self.current_sprite]
 		self.rect = self.image.get_rect()
 		self.rect.center = [180,360] # Fixed position of player 
-		self.vel = 16
-		self.neg_vel = -16 
-
-	def reset_vel(self):
-		self.vel = 17
-	def reset_neg_vel(self):
-		self.neg_vel = -17  
 
 	def update(self):
 		self.advanced_health()
@@ -1256,26 +1301,44 @@ class MeleeChampionNine(Champion, pygame.sprite.Sprite):
 		self.reset_attack()
 		self.reset_attack_landed()
 
+
 		if self.run_left_animation:
 			self.reset_vel()
 			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
-			self.current_sprite += 0.4
+			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_left_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] >= 800:
+			if self.rect.center[0] >= 800 and not self.ul_attack:
 				self.vel = 0 
 				self.run_left_animation = False 
-				self.attack_animation = True    
+				self.attack_animation = True 
+			if self.rect.center[0] >= 790 and self.ul_attack:
+				self.vel = 0 
+				self.run_left_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_left_sprites[int(self.current_sprite)]
 
 		if self.attack_animation:
-			self.current_sprite += 0.3
+			self.current_sprite += 0.25
 			if int(self.current_sprite) >= len(self.attack_left_sprites):
 				self.current_sprite = 0
 				self.attack_animation = False 
 				self.run_right_animation = True    
 				self.attack_landed = True 
 			self.image = self.attack_left_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15 
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ut_left_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_right_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False
+				self.attack_damage -= 15  
+				self.reseT_energy()
+			self.image = self.ut_left_sprites[int(self.current_sprite)]
 
 		if self.run_right_animation:
 			self.reset_neg_vel()
@@ -1315,7 +1378,7 @@ class MeleeChampionNine(Champion, pygame.sprite.Sprite):
 # Noburo
 class MeleeChampionTen(Champion, pygame.sprite.Sprite):
 	def __init__(self):
-		Champion.__init__(self, "Noburo", "Air", 840, 720, "Fire", "Water", "Desert")
+		Champion.__init__(self, "Noburo", "Air", 840, 720, "Fire", "Water", "Forest")
 		pygame.sprite.Sprite.__init__(self) 
 
 		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Noburo/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
@@ -1350,13 +1413,6 @@ class MeleeChampionTen(Champion, pygame.sprite.Sprite):
 		self.image = self.attack_left_sprites[self.current_sprite]
 		self.rect = self.image.get_rect()
 		self.rect.center = [180,360] # Fixed position of player 
-		self.vel = 16
-		self.neg_vel = -16 
-
-	def reset_vel(self):
-		self.vel = 17
-	def reset_neg_vel(self):
-		self.neg_vel = -17  
 
 	def update(self):
 		self.advanced_health()
@@ -1364,26 +1420,44 @@ class MeleeChampionTen(Champion, pygame.sprite.Sprite):
 		self.reset_attack()
 		self.reset_attack_landed()
 
+
 		if self.run_left_animation:
 			self.reset_vel()
 			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
-			self.current_sprite += 0.4
+			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_left_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] >= 800:
+			if self.rect.center[0] >= 800 and not self.ul_attack:
 				self.vel = 0 
 				self.run_left_animation = False 
-				self.attack_animation = True    
+				self.attack_animation = True 
+			if self.rect.center[0] >= 790 and self.ul_attack:
+				self.vel = 0 
+				self.run_left_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_left_sprites[int(self.current_sprite)]
 
 		if self.attack_animation:
-			self.current_sprite += 0.3
+			self.current_sprite += 0.25
 			if int(self.current_sprite) >= len(self.attack_left_sprites):
 				self.current_sprite = 0
 				self.attack_animation = False 
 				self.run_right_animation = True    
 				self.attack_landed = True 
 			self.image = self.attack_left_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15 
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ut_left_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_right_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False
+				self.attack_damage -= 15  
+				self.reseT_energy()
+			self.image = self.ut_left_sprites[int(self.current_sprite)]
 
 		if self.run_right_animation:
 			self.reset_neg_vel()
@@ -1454,18 +1528,10 @@ class MeleeChampionEleven(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("champions/Yahiro/death_left_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/death_left_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("champions/Yahiro/death_left_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/death_left_6.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-
 		self.current_sprite = 0
 		self.image = self.attack_left_sprites[self.current_sprite]
 		self.rect = self.image.get_rect()
 		self.rect.center = [180,375] # Fixed position of player 
-		self.vel = 16
-		self.neg_vel = -16 
-
-	def reset_vel(self):
-		self.vel = 17
-	def reset_neg_vel(self):
-		self.neg_vel = -17  
 
 	def update(self):
 		self.advanced_health()
@@ -1473,26 +1539,44 @@ class MeleeChampionEleven(Champion, pygame.sprite.Sprite):
 		self.reset_attack()
 		self.reset_attack_landed()
 
+
 		if self.run_left_animation:
 			self.reset_vel()
 			self.rect.move_ip (self.vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
-			self.current_sprite += 0.4
+			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_left_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] >= 800:
+			if self.rect.center[0] >= 800 and not self.ul_attack:
 				self.vel = 0 
 				self.run_left_animation = False 
-				self.attack_animation = True    
+				self.attack_animation = True 
+			if self.rect.center[0] >= 790 and self.ul_attack:
+				self.vel = 0 
+				self.run_left_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_left_sprites[int(self.current_sprite)]
 
 		if self.attack_animation:
-			self.current_sprite += 0.3
+			self.current_sprite += 0.25
 			if int(self.current_sprite) >= len(self.attack_left_sprites):
 				self.current_sprite = 0
 				self.attack_animation = False 
 				self.run_right_animation = True    
 				self.attack_landed = True 
 			self.image = self.attack_left_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15 
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ut_left_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_right_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False
+				self.attack_damage -= 15  
+				self.reseT_energy()
+			self.image = self.ut_left_sprites[int(self.current_sprite)]
 
 		if self.run_right_animation:
 			self.reset_neg_vel()
