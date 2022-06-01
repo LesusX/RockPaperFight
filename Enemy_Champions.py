@@ -3,19 +3,20 @@ screen = pygame.display.set_mode((1200,720))
 
 class Champion(pygame.sprite.Sprite):
 	def __init__(self, name, element, sprite_width, sprite_height, weakness, strong_against, arena_bonus):
-		#----------------------------------------------------------
+		#-----------------------  Animation parameters -----------------------------------
 		self.ultimate_attack_animation = False 
+		self.ult_attack_animation = False
 		self.run_right_animation = False 
 		self.run_left_animation = False 
 		self.attack_animation = False
+		self.death_animation = False 
 		self.idle_animation = False
 		self.take_hit_right = False 
+		self.hit_animation = False 
 		self.death_right = False 
 		self.ul_attack = False  		
-		
-		self.death_animation = False 
-		self.hit_animation = False 
-		self.ult_attack_animation = False
+		self.neg_vel = -15 
+		self.vel = 15
 		#----------------------------------------------------------
 		self.name = name 
 		self.element = element
@@ -25,10 +26,7 @@ class Champion(pygame.sprite.Sprite):
 		self.sprite_height = sprite_height 
 		self.arena_bonus = arena_bonus 
 		#---------------------
-		self.max_health = 100 
-		self.health = 100 
-		self.energy = 100 
-		self.attack_damage = 10
+		self.attack_damage = 100
 		self.attack = False 
 		self.heal = False 
 		self.power_up = False
@@ -42,14 +40,14 @@ class Champion(pygame.sprite.Sprite):
 		self.health_ratio = self.max_health / self.health_bar_length
 		self.health_change_speed = 5
 		# Energybar parameters 
-		self.current_energy = 100
+		self.energy = 100 # This is the reall amount of energy that each player starts with  
+		self.current_energy = 100	# This is the amount of energy shown in the energy bar.
 		self.target_energy = 100 
 		self.max_energy = 1000
 		self.energy_bar_length = 300
 		self.energy_ratio = self.max_energy / self.energy_bar_length
 		self.energy_change_speed = 5
-	#---------------------------------------------------------
-
+#-------------------------- Animation functions -------------------------------
 	def start_running(self):
 		self.idle_animation = False 
 		self.run_right_animation = True
@@ -58,14 +56,13 @@ class Champion(pygame.sprite.Sprite):
 		self.idle_animation = True
 
 	def start_running_with_ult(self):
+		self.ul_attack = True 
 		self.idle_animation = False 
 		self.run_right_animation = True
-		self.ul_attack = True 
 
 	def start_hit_anim(self):
 		self.idle_animation = False 
 		self.hit_animation = True 
-
 
 	def start_death_animation(self):
 		self.idle_animation = False 
@@ -76,20 +73,31 @@ class Champion(pygame.sprite.Sprite):
 
 	def reset_attack_landed(self):
 		self.attack_landed = False 
+	
+	def reset_vel(self):
+		self.vel = 15 
 
+	def reset_neg_vel(self):
+		self.neg_vel = -15
 
-	#--------------------------------------------------------
+	#------------------ Energy and attack functions --------------------------------------
 	def get_energy(self,amount):
 		if self.target_energy < self.max_energy:
 			self.target_energy += amount
+			self.energy += amount  
 		if self.target_energy > self.max_energy:
 			self.target_energy = self.max_energy
+			self.energy = self.max_energy
 			
 	def lose_energy(self,amount):
 		if self.target_energy > 0:
 			self.target_energy -= amount
 		if self.target_energy < 0:
 			self.target_energy = 0
+
+	def reseT_energy(self):
+		self.energy = 100
+		self.target_energy = 100 
 
 	def advanced_energy(self):
 		transition_width = 0
@@ -123,8 +131,10 @@ class Champion(pygame.sprite.Sprite):
 	def get_health(self,amount):
 		if self.target_health < self.max_health:
 			self.target_health += amount
+			self.health += amount
 		if self.target_health > self.max_health:
 			self.target_health = self.max_health
+			self.health = self.max_health
 
 	def advanced_health(self):
 		transition_width = 0
@@ -189,7 +199,7 @@ class Champion(pygame.sprite.Sprite):
 # Dash 
 class EnemyMeleeChampionOne(Champion, pygame.sprite.Sprite):
 	def __init__(self):
-		Champion.__init__(self, "Dash", "Fire", 830, 550, "Dark", "Fire", "ice")
+		Champion.__init__(self, "Dash", "Fire", 830, 550, "Dark", "Fire", "Desert")
 		pygame.sprite.Sprite.__init__(self) 
 
 		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Dash/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
@@ -227,20 +237,21 @@ class EnemyMeleeChampionOne(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("champions/Dash/death_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Dash/death_right_12.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("champions/Dash/death_right_13.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 		
+		self.ult_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
+		pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_12.png").convert_alpha(), (self.sprite_width, self.sprite_height)),		
+		pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_13.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_14.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_15.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_16.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_17.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Dash/ult_right_18.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
+
 		self.current_sprite = 0
 		self.image = self.run_left_sprites[self.current_sprite]
 		self.rect = self.image.get_rect()
 		self.rect.center = [950, 200] # Position of player 
 		self.moving = pygame.Rect(180,355,400,450)
-
-		self.vel = 15
-		self.neg_vel = -15 
-
-	def reset_vel(self):
-		self.vel = 15 
-
-	def reset_neg_vel(self):
-		self.neg_vel = -15
 
 	def update(self):
 		self.advanced_health()
@@ -254,15 +265,31 @@ class EnemyMeleeChampionOne(Champion, pygame.sprite.Sprite):
 			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_right_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] <= 290:
-				self.neg_vel = 0 
+			if self.rect.center[0] <= 285 and not self.ul_attack:
+				self.vel = 0 
 				self.run_right_animation = False 
 				self.attack_animation = True 
+			if self.rect.center[0] <= 300 and self.ul_attack:
+				self.vel = 0 
+				self.run_right_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_right_sprites[int(self.current_sprite)]
 
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ult_right_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_left_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False 
+				self.attack_damage -= 15 
+				self.reseT_energy()
+			self.image = self.ult_right_sprites[int(self.current_sprite)] 
 
 		if self.attack_animation:
-			self.current_sprite += 0.16 
+			self.current_sprite += 0.25
 			if int(self.current_sprite) >= len(self.attack_right_sprites):
 				self.current_sprite = 0
 				self.attack_animation = False 
@@ -310,7 +337,7 @@ class EnemyMeleeChampionOne(Champion, pygame.sprite.Sprite):
 # Casandra
 class EnemyMeleeChampionTwo(Champion, pygame.sprite.Sprite):
 	def __init__(self):
-		Champion.__init__(self, "Casandra", "Water", 1150, 700, "Air", "Fire", "ice")
+		Champion.__init__(self, "Casandra", "Water", 1150, 700, "Air", "Fire", "Ice")
 		pygame.sprite.Sprite.__init__(self) 
 
 		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Casandra/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Casandra/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
@@ -335,7 +362,7 @@ class EnemyMeleeChampionTwo(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("Champions/Casandra/attack_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/attack_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Casandra/attack_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-		self.ut_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		self.ult_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Casandra/ult_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
@@ -372,16 +399,6 @@ class EnemyMeleeChampionTwo(Champion, pygame.sprite.Sprite):
 		self.rect.center = [980, 120] # Position of player 
 		self.moving = pygame.Rect(180,355,400,450)
 
-		self.vel = 15
-		self.neg_vel = -15 
-
-
-	def reset_vel(self):
-		self.vel = 15 
-
-	def reset_neg_vel(self):
-		self.neg_vel = -15
-
 	def update(self):
 		self.advanced_health()
 		self.advanced_energy()
@@ -394,11 +411,28 @@ class EnemyMeleeChampionTwo(Champion, pygame.sprite.Sprite):
 			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_right_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] <= 285:
-				self.neg_vel = 0 
+			if self.rect.center[0] <= 285 and not self.ul_attack:
+				self.vel = 0 
 				self.run_right_animation = False 
 				self.attack_animation = True 
+			if self.rect.center[0] <= 300 and self.ul_attack:
+				self.vel = 0 
+				self.run_right_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ult_right_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_left_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False 
+				self.attack_damage -= 15 
+				self.reseT_energy()
+			self.image = self.ult_right_sprites[int(self.current_sprite)] 
 
 
 		if self.attack_animation:
@@ -472,7 +506,7 @@ class EnemyMeleeChampionThree(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("Champions/Ives/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("Champions/Ives/attack_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/attack_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-		self.ut_left_sprites = [pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		self.ult_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Ives/ult_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
@@ -510,15 +544,6 @@ class EnemyMeleeChampionThree(Champion, pygame.sprite.Sprite):
 		self.rect.center = [980, 150] # Position of player 
 		self.moving = pygame.Rect(180,355,400,450)
 
-		self.vel = 15
-		self.neg_vel = -15 
-
-	def reset_vel(self):
-		self.vel = 15 
-
-	def reset_neg_vel(self):
-		self.neg_vel = -15
-
 	def update(self):
 		self.advanced_health()
 		self.advanced_energy()
@@ -531,11 +556,28 @@ class EnemyMeleeChampionThree(Champion, pygame.sprite.Sprite):
 			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_right_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] <= 290:
-				self.neg_vel = 0 
+			if self.rect.center[0] <= 285 and not self.ul_attack:
+				self.vel = 0 
 				self.run_right_animation = False 
 				self.attack_animation = True 
+			if self.rect.center[0] <= 300 and self.ul_attack:
+				self.vel = 0 
+				self.run_right_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ult_right_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_left_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False 
+				self.attack_damage -= 15 
+				self.reseT_energy()
+			self.image = self.ult_right_sprites[int(self.current_sprite)] 
 
 
 		if self.attack_animation:
@@ -608,7 +650,7 @@ class EnemyMeleeChampionFour(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("Champions/Norwin/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Norwin/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("Champions/Norwin/attack_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Norwin/attack_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-		self.ut_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		self.ult_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Norwin/ult_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
@@ -633,15 +675,6 @@ class EnemyMeleeChampionFour(Champion, pygame.sprite.Sprite):
 		self.rect.center = [980, 170] # Position of player 
 		self.moving = pygame.Rect(180,355,400,450)
 
-		self.vel = 15
-		self.neg_vel = -15 
-
-	def reset_vel(self):
-		self.vel = 15 
-
-	def reset_neg_vel(self):
-		self.neg_vel = -15
-
 	def update(self):
 		self.advanced_health()
 		self.advanced_energy()
@@ -654,11 +687,28 @@ class EnemyMeleeChampionFour(Champion, pygame.sprite.Sprite):
 			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_right_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] <= 290:
-				self.neg_vel = 0 
+			if self.rect.center[0] <= 285 and not self.ul_attack:
+				self.vel = 0 
 				self.run_right_animation = False 
 				self.attack_animation = True 
+			if self.rect.center[0] <= 300 and self.ul_attack:
+				self.vel = 0 
+				self.run_right_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ult_right_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_left_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False 
+				self.attack_damage -= 15 
+				self.reseT_energy()
+			self.image = self.ult_right_sprites[int(self.current_sprite)] 
 
 
 		if self.attack_animation:
@@ -732,7 +782,7 @@ class EnemyMeleeChampionFive(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("Champions/Hassaron/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Hassaron/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("Champions/Hassaron/attack_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Hassaron/attack_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-		self.ut_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		self.ult_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Hassaron/ult_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
@@ -752,16 +802,6 @@ class EnemyMeleeChampionFive(Champion, pygame.sprite.Sprite):
 		self.rect.center = [980, 320] # Position of player 
 		self.moving = pygame.Rect(180,355,400,450)
 
-		self.vel = 15
-		self.neg_vel = -15 
-
-
-	def reset_vel(self):
-		self.vel = 15 
-
-	def reset_neg_vel(self):
-		self.neg_vel = -15
-
 	def update(self):
 		self.advanced_health()
 		self.advanced_energy()
@@ -774,13 +814,30 @@ class EnemyMeleeChampionFive(Champion, pygame.sprite.Sprite):
 			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_right_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] <= 290:
-				self.neg_vel = 0 
+			if self.rect.center[0] <= 285 and not self.ul_attack:
+				self.vel = 0 
 				self.run_right_animation = False 
 				self.attack_animation = True 
+			if self.rect.center[0] <= 300 and self.ul_attack:
+				self.vel = 0 
+				self.run_right_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_right_sprites[int(self.current_sprite)]
 
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ult_right_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_left_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False 
+				self.attack_damage -= 15 
+				self.reseT_energy()
+			self.image = self.ult_right_sprites[int(self.current_sprite)] 
 
+		
 		if self.attack_animation:
 			self.current_sprite += 0.2
 			if int(self.current_sprite) >= len(self.attack_right_sprites):
@@ -853,7 +910,7 @@ class EnemyMeleeChampionSix(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_12.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-		self.ut_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		self.ult_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irathas/attack_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
@@ -884,15 +941,6 @@ class EnemyMeleeChampionSix(Champion, pygame.sprite.Sprite):
 		self.rect.center = [980, 320] # Position of player 
 		self.moving = pygame.Rect(180,355,400,450)
 
-		self.vel = 16
-		self.neg_vel = -16 
-
-	def reset_vel(self):
-		self.vel = 16 
-
-	def reset_neg_vel(self):
-		self.neg_vel = -16
-
 	def update(self):
 		self.advanced_health()
 		self.advanced_energy()
@@ -902,14 +950,31 @@ class EnemyMeleeChampionSix(Champion, pygame.sprite.Sprite):
 		if self.run_right_animation:	
 			self.reset_neg_vel()
 			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
-			self.current_sprite += 0.4
+			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_right_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] <= 290:
-				self.neg_vel = 0 
+			if self.rect.center[0] <= 285 and not self.ul_attack:
+				self.vel = 0 
 				self.run_right_animation = False 
 				self.attack_animation = True 
+			if self.rect.center[0] <= 300 and self.ul_attack:
+				self.vel = 0 
+				self.run_right_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ult_right_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_left_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False 
+				self.attack_damage -= 15 
+				self.reseT_energy()
+			self.image = self.ult_right_sprites[int(self.current_sprite)] 
 
 
 		if self.attack_animation:
@@ -980,7 +1045,7 @@ class EnemyMeleeChampionSeven(Champion, pygame.sprite.Sprite):
 		self.attack_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-		self.ut_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		self.ult_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Irgomir/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
 		self.take_hit_right_sprites = [pygame.transform.scale(pygame.image.load("champions/Irgomir/take_hit_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/take_hit_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
@@ -999,15 +1064,6 @@ class EnemyMeleeChampionSeven(Champion, pygame.sprite.Sprite):
 		self.rect.center = [980, 325] # Position of player 
 		self.moving = pygame.Rect(180,355,400,450)
 
-		self.vel = 16
-		self.neg_vel = -16 
-
-	def reset_vel(self):
-		self.vel = 16 
-
-	def reset_neg_vel(self):
-		self.neg_vel = -16
-
 	def update(self):
 		self.advanced_health()
 		self.advanced_energy()
@@ -1017,14 +1073,31 @@ class EnemyMeleeChampionSeven(Champion, pygame.sprite.Sprite):
 		if self.run_right_animation:	
 			self.reset_neg_vel()
 			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
-			self.current_sprite += 0.4
+			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_right_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] <= 290:
-				self.neg_vel = 0 
+			if self.rect.center[0] <= 285 and not self.ul_attack:
+				self.vel = 0 
 				self.run_right_animation = False 
 				self.attack_animation = True 
+			if self.rect.center[0] <= 300 and self.ul_attack:
+				self.vel = 0 
+				self.run_right_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ult_right_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_left_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False 
+				self.attack_damage -= 15 
+				self.reseT_energy()
+			self.image = self.ult_right_sprites[int(self.current_sprite)] 
 
 
 		if self.attack_animation:
@@ -1075,7 +1148,7 @@ class EnemyMeleeChampionSeven(Champion, pygame.sprite.Sprite):
 # Lambert
 class EnemyMeleeChampionEight(Champion, pygame.sprite.Sprite):
 	def __init__(self):
-		Champion.__init__(self, "Lambert", "Dark", 520, 450, "Fire", "Air", "Cave")
+		Champion.__init__(self, "Lambert", "Dark", 520, 450, "Fire", "Air", "Ice")
 		pygame.sprite.Sprite.__init__(self) 
 
 		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Lambert/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
@@ -1097,7 +1170,7 @@ class EnemyMeleeChampionEight(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("Champions/Lambert/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Lambert/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Lambert/attack_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Lambert/attack_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-		self.ut_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		self.ult_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Lambert/ult_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
@@ -1117,16 +1190,6 @@ class EnemyMeleeChampionEight(Champion, pygame.sprite.Sprite):
 		self.rect.center = [980, 350] # Position of player 
 		self.moving = pygame.Rect(180,355,400,450)
 
-		self.vel = 16
-		self.neg_vel = -16 
-
-
-	def reset_vel(self):
-		self.vel = 16 
-
-	def reset_neg_vel(self):
-		self.neg_vel = -16
-
 	def update(self):
 		self.advanced_health()
 		self.advanced_energy()
@@ -1136,14 +1199,31 @@ class EnemyMeleeChampionEight(Champion, pygame.sprite.Sprite):
 		if self.run_right_animation:	
 			self.reset_neg_vel()
 			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
-			self.current_sprite += 0.4
+			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_right_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] <= 290:
-				self.neg_vel = 0 
+			if self.rect.center[0] <= 285 and not self.ul_attack:
+				self.vel = 0 
 				self.run_right_animation = False 
 				self.attack_animation = True 
+			if self.rect.center[0] <= 300 and self.ul_attack:
+				self.vel = 0 
+				self.run_right_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ult_right_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_left_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False 
+				self.attack_damage -= 15 
+				self.reseT_energy()
+			self.image = self.ult_right_sprites[int(self.current_sprite)] 
 
 
 		if self.attack_animation:
@@ -1219,7 +1299,7 @@ class EnemyMeleeChampionNine(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_16.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_18.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_19.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-		self.ut_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		self.ult_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Nimbus/attack_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
@@ -1243,15 +1323,6 @@ class EnemyMeleeChampionNine(Champion, pygame.sprite.Sprite):
 		self.rect.center = [980, 340] # Position of player 
 		self.moving = pygame.Rect(180,355,400,450)
 
-		self.vel = 16
-		self.neg_vel = -16 
-
-	def reset_vel(self):
-		self.vel = 16 
-
-	def reset_neg_vel(self):
-		self.neg_vel = -16
-
 	def update(self):
 		self.advanced_health()
 		self.advanced_energy()
@@ -1261,14 +1332,31 @@ class EnemyMeleeChampionNine(Champion, pygame.sprite.Sprite):
 		if self.run_right_animation:	
 			self.reset_neg_vel()
 			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
-			self.current_sprite += 0.4
+			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_right_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] <= 290:
-				self.neg_vel = 0 
+			if self.rect.center[0] <= 285 and not self.ul_attack:
+				self.vel = 0 
 				self.run_right_animation = False 
 				self.attack_animation = True 
+			if self.rect.center[0] <= 300 and self.ul_attack:
+				self.vel = 0 
+				self.run_right_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ult_right_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_left_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False 
+				self.attack_damage -= 15 
+				self.reseT_energy()
+			self.image = self.ult_right_sprites[int(self.current_sprite)] 
 
 
 		if self.attack_animation:
@@ -1319,7 +1407,7 @@ class EnemyMeleeChampionNine(Champion, pygame.sprite.Sprite):
 # Noburo
 class EnemyMeleeChampionTen(Champion, pygame.sprite.Sprite):
 	def __init__(self):
-		Champion.__init__(self, "Noburo", "Air", 840, 720, "Fire", "Water", "Desert")
+		Champion.__init__(self, "Noburo", "Air", 840, 720, "Fire", "Water", "Forest")
 		pygame.sprite.Sprite.__init__(self) 
 
 		self.run_left_sprites = [pygame.transform.scale(pygame.image.load("champions/Noburo/run_left_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/run_left_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
@@ -1356,15 +1444,6 @@ class EnemyMeleeChampionTen(Champion, pygame.sprite.Sprite):
 		self.rect.center = [980, 360] # Position of player 
 		self.moving = pygame.Rect(180,355,400,450)
 
-		self.vel = 16
-		self.neg_vel = -16 
-
-	def reset_vel(self):
-		self.vel = 16 
-
-	def reset_neg_vel(self):
-		self.neg_vel = -16
-
 	def update(self):
 		self.advanced_health()
 		self.advanced_energy()
@@ -1374,18 +1453,34 @@ class EnemyMeleeChampionTen(Champion, pygame.sprite.Sprite):
 		if self.run_right_animation:	
 			self.reset_neg_vel()
 			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
-			self.current_sprite += 0.4
+			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_right_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] <= 290:
-				self.neg_vel = 0 
+			if self.rect.center[0] <= 285 and not self.ul_attack:
+				self.vel = 0 
 				self.run_right_animation = False 
 				self.attack_animation = True 
+			if self.rect.center[0] <= 300 and self.ul_attack:
+				self.vel = 0 
+				self.run_right_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_right_sprites[int(self.current_sprite)]
 
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ult_right_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_left_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False 
+				self.attack_damage -= 15 
+				self.reseT_energy()
+			self.image = self.ult_right_sprites[int(self.current_sprite)] 
 
 		if self.attack_animation:
-			self.current_sprite += 0.3
+			self.current_sprite += 0.18
 			if int(self.current_sprite) >= len(self.attack_right_sprites):
 				self.current_sprite = 0
 				self.attack_animation = False 
@@ -1452,7 +1547,7 @@ class EnemyMeleeChampionEleven(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("Champions/Yahiro/attack_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Yahiro/attack_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Yahiro/attack_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Yahiro/attack_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-		self.ut_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Yahiro/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Yahiro/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
+		self.ult_right_sprites = [pygame.transform.scale(pygame.image.load("Champions/Yahiro/ult_right_1.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Yahiro/ult_right_2.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Yahiro/ult_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Yahiro/ult_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("Champions/Yahiro/ult_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("Champions/Yahiro/ult_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
@@ -1468,17 +1563,7 @@ class EnemyMeleeChampionEleven(Champion, pygame.sprite.Sprite):
 		self.image = self.run_left_sprites[self.current_sprite]
 		self.rect = self.image.get_rect()
 		self.rect.center = [980, 375] # Position of player 
-		self.moving = pygame.Rect(180,355,400,450)
-
-		self.vel = 16
-		self.neg_vel = -16 
-
-
-	def reset_vel(self):
-		self.vel = 16 
-
-	def reset_neg_vel(self):
-		self.neg_vel = -16
+		self.moving = pygame.Rect(180,355,400,450) 
 
 	def update(self):
 		self.advanced_health()
@@ -1489,14 +1574,31 @@ class EnemyMeleeChampionEleven(Champion, pygame.sprite.Sprite):
 		if self.run_right_animation:	
 			self.reset_neg_vel()
 			self.rect.move_ip (self.neg_vel, 0) # Move the rectangle that holds the sprites by positive velocity so it moves left on x axis. 
-			self.current_sprite += 0.4
+			self.current_sprite += 0.45 
 			if int(self.current_sprite) >= len(self.run_right_sprites):
 				self.current_sprite = 0
-			if self.rect.center[0] <= 300:
-				self.neg_vel = 0 
+			if self.rect.center[0] <= 285 and not self.ul_attack:
+				self.vel = 0 
 				self.run_right_animation = False 
 				self.attack_animation = True 
+			if self.rect.center[0] <= 300 and self.ul_attack:
+				self.vel = 0 
+				self.run_right_animation = False 
+				self.ultimate_attack_animation = True 
 			self.image = self.run_right_sprites[int(self.current_sprite)]
+
+		if self.ultimate_attack_animation:
+			self.attack_damage += 15
+			self.current_sprite += 0.3
+			if int(self.current_sprite) >= len(self.ult_right_sprites):
+				self.current_sprite = 0
+				self.ultimate_attack_animation = False 
+				self.run_left_animation = True    
+				self.attack_landed = True 
+				self.ul_attack = False 
+				self.attack_damage -= 15 
+				self.reseT_energy()
+			self.image = self.ult_right_sprites[int(self.current_sprite)] 
 
 
 		if self.attack_animation:
@@ -1543,4 +1645,5 @@ class EnemyMeleeChampionEleven(Champion, pygame.sprite.Sprite):
 				self.current_sprite = 0
 
 			self.image = self.idle_right_sprites[int(self.current_sprite)]
+
 
