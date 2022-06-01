@@ -45,8 +45,6 @@ BOX_B = pygame.transform.scale(pygame.image.load("assets/input_box.png").convert
 
 # Game variables related to moves, and the available potions
 move_list = [] 
-pl_zero_potion_count = 2 
-pl_one_potion_count = 2 
 
 # Create the blue highlighted parts of the buttons and store them in a list 
 button1 = Button('Rock',130, 40,(65, 550),5)
@@ -346,24 +344,20 @@ def main():
                 btn.is_locked = False 
         
         if move_list and champion_zero.attack_landed == True:
-            champion_one.health -= 12 
+            champion_one.target_health -= 12 
             champion_one.get_damage(120)
 
         if move_list and champion_one.attack_landed == True:
-            champion_zero.health -= 12
+            champion_zero.target_health -= 12
             champion_zero.get_damage(120)
 
         # -----------------------------------------------------------------------------
         # Once either of the player's champion is dead, end the game with a loading scrchampion_oneand return them to the main menu
-        if champion_one.health <= 0: 
-            pl_zero_potion_count = 2 
-            pl_one_potion_count = 2 
+        if champion_one.target_health <= 0: 
             start_loading_screen()
             return False   
 
-        if champion_zero.health <= 0:
-            pl_zero_potion_count = 2 
-            pl_one_potion_count = 2 
+        if champion_zero.target_health <= 0:
             start_loading_screen()
             return False
          
@@ -404,18 +398,19 @@ def play_offline():   # TODO: Take this out once the select champion scrchampion
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_OFFLINE.checkForInput(PLAY_MOUSE_POS):
                     x = selector()  # From the selector scene get the players selected champion
-                    offline_game.main_menu_x(x)
-                    run = False 
+                    offline_game.start_offline_game(x)
+                    return False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_ONLINE.checkForInput(PLAY_MOUSE_POS):
                     main() 
-                    # run = False 
+                    return False 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if BACK_TO_MENU.checkForInput(PLAY_MOUSE_POS):
                     return False
         pygame.display.update() 
 
 # Options allow the player to increase or decrease the games volume, dificulty level and even brightness 
+# The player can also read the rules from the options panel
 # TODO: Add the above functionalities 
 def options():
     while True:
@@ -423,15 +418,13 @@ def options():
 
         win.fill("white")
 
-        OPTIONS_TEXT = get_font(30).render("This is the OPTIONS win! ", True, "Black")
-        OPTIONS_TEXT_TWO = get_font(30).render("There are no options available...Yet!", True, "Black")
-        OPTIONS_RECT = OPTIONS_TEXT.get_rect(center=(640, 260))
-        win.blit(OPTIONS_TEXT, OPTIONS_RECT)
-        OPTIONS_RECT = OPTIONS_TEXT_TWO.get_rect(center=(640, 300))
-        win.blit(OPTIONS_TEXT_TWO, OPTIONS_RECT)
+        BG_FONT = pygame.transform.scale(pygame.image.load("assets/selection_bg.jpg").convert_alpha(), (1400, 790))
+        BG = pygame.transform.scale(pygame.image.load("assets/rules_page.png").convert_alpha(), (1120, 710))
+        SCREEN.blit(BG_FONT, (0, 0))
+        SCREEN.blit(BG, (50, 10))
 
-        OPTIONS_BACK = BaseButton(image=None, pos=(640, 460), 
-                            text_input="BACK", font=get_font(50), base_color="Black", hovering_color="Green")
+        OPTIONS_BACK = BaseButton(image=None, pos=(980, 590), 
+                            text_input="BACK", font=get_font(40), base_color="Black", hovering_color="Green")
 
 
         OPTIONS_BACK.changeColor(OPTIONS_MOUSE_POS)
@@ -447,7 +440,7 @@ def options():
 
         pygame.display.update()
 
-# Menu scrchampion_onethat connects all screens together 
+#  Main menu connects all screens together 
 def main_menu():
     while True:
         win.blit(MENU_BACKGROUND, (0, 0))
