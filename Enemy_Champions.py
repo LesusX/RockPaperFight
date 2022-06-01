@@ -3,20 +3,21 @@ screen = pygame.display.set_mode((1200,720))
 
 class Champion(pygame.sprite.Sprite):
 	def __init__(self, name, element, sprite_width, sprite_height, weakness, strong_against, arena_bonus):
-		#-----------------------  Animation parameters -----------------------------------
+		#----------------------------------------------------------
 		self.ultimate_attack_animation = False 
-		self.ult_attack_animation = False
 		self.run_right_animation = False 
 		self.run_left_animation = False 
 		self.attack_animation = False
-		self.death_animation = False 
 		self.idle_animation = False
 		self.take_hit_right = False 
-		self.hit_animation = False 
 		self.death_right = False 
 		self.ul_attack = False  		
-		self.neg_vel = -15 
-		self.vel = 15
+
+		self.vel = 16
+		self.neg_vel = -16 
+		self.death_animation = False 
+		self.hit_animation = False 
+		self.ult_attack_animation = False
 		#----------------------------------------------------------
 		self.name = name 
 		self.element = element
@@ -47,7 +48,8 @@ class Champion(pygame.sprite.Sprite):
 		self.energy_bar_length = 300
 		self.energy_ratio = self.max_energy / self.energy_bar_length
 		self.energy_change_speed = 5
-#-------------------------- Animation functions -------------------------------
+	#---------------------------------------------------------
+
 	def start_running(self):
 		self.idle_animation = False 
 		self.run_right_animation = True
@@ -73,13 +75,12 @@ class Champion(pygame.sprite.Sprite):
 
 	def reset_attack_landed(self):
 		self.attack_landed = False 
-	
+
 	def reset_vel(self):
 		self.vel = 15 
 
 	def reset_neg_vel(self):
 		self.neg_vel = -15
-
 	#------------------ Energy and attack functions --------------------------------------
 	def get_energy(self,amount):
 		if self.target_energy < self.max_energy:
@@ -253,6 +254,7 @@ class EnemyMeleeChampionOne(Champion, pygame.sprite.Sprite):
 		self.rect.center = [950, 200] # Position of player 
 		self.moving = pygame.Rect(180,355,400,450)
 
+
 	def update(self):
 		self.advanced_health()
 		self.advanced_energy()
@@ -398,6 +400,7 @@ class EnemyMeleeChampionTwo(Champion, pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.center = [980, 120] # Position of player 
 		self.moving = pygame.Rect(180,355,400,450)
+
 
 	def update(self):
 		self.advanced_health()
@@ -667,7 +670,6 @@ class EnemyMeleeChampionFour(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("champions/Norwin/death_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/death_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("champions/Norwin/death_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Norwin/death_right_10.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("champions/Norwin/death_right_11.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
-
 
 		self.current_sprite = 0
 		self.image = self.run_left_sprites[self.current_sprite]
@@ -941,6 +943,7 @@ class EnemyMeleeChampionSix(Champion, pygame.sprite.Sprite):
 		self.rect.center = [980, 320] # Position of player 
 		self.moving = pygame.Rect(180,355,400,450)
 
+
 	def update(self):
 		self.advanced_health()
 		self.advanced_energy()
@@ -1056,7 +1059,6 @@ class EnemyMeleeChampionSeven(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("champions/Irgomir/death_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/death_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("champions/Irgomir/death_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Irgomir/death_right_8.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("champions/Irgomir/death_right_9.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
-
 
 		self.current_sprite = 0
 		self.image = self.run_left_sprites[self.current_sprite]
@@ -1182,7 +1184,6 @@ class EnemyMeleeChampionEight(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("champions/Lambert/death_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/death_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("champions/Lambert/death_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Lambert/death_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("champions/Lambert/death_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
-
 
 		self.current_sprite = 0
 		self.image = self.run_left_sprites[self.current_sprite]
@@ -1437,7 +1438,6 @@ class EnemyMeleeChampionTen(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("champions/Noburo/death_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Noburo/death_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height)),
 		pygame.transform.scale(pygame.image.load("champions/Noburo/death_right_7.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-
 		self.current_sprite = 0
 		self.image = self.run_left_sprites[self.current_sprite]
 		self.rect = self.image.get_rect()
@@ -1558,12 +1558,11 @@ class EnemyMeleeChampionEleven(Champion, pygame.sprite.Sprite):
 		pygame.transform.scale(pygame.image.load("champions/Yahiro/death_right_3.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/death_right_4.png").convert_alpha(), (self.sprite_width, self.sprite_height)), 
 		pygame.transform.scale(pygame.image.load("champions/Yahiro/death_right_5.png").convert_alpha(), (self.sprite_width, self.sprite_height)), pygame.transform.scale(pygame.image.load("champions/Yahiro/death_right_6.png").convert_alpha(), (self.sprite_width, self.sprite_height))]
 
-
 		self.current_sprite = 0
 		self.image = self.run_left_sprites[self.current_sprite]
 		self.rect = self.image.get_rect()
 		self.rect.center = [980, 375] # Position of player 
-		self.moving = pygame.Rect(180,355,400,450) 
+		self.moving = pygame.Rect(180,355,400,450)
 
 	def update(self):
 		self.advanced_health()
@@ -1645,5 +1644,7 @@ class EnemyMeleeChampionEleven(Champion, pygame.sprite.Sprite):
 				self.current_sprite = 0
 
 			self.image = self.idle_right_sprites[int(self.current_sprite)]
+
+
 
 
