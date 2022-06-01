@@ -21,7 +21,7 @@ result_font = pygame.font.Font("assets/font.ttf", 40)
 # Use PosX, posY to set the position of the chosen champions name 
 posX = 5
 posY = 700
-arenas = ["forest", "ice", "cave", "desert"] 
+arenas = ["Forest", "Ice", "Cave", "Desert"] 
 
 move_list = [] # Store temporarly any move made. Based on the move here a button will be highlighted 
 
@@ -29,15 +29,16 @@ button1 = Button('Rock',130, 40, (265, 530),5)
 button2 = Button('Paper',130, 40,(265, 580),5)
 button3 = Button('Scissors',190, 40,(245, 630),5)
 button4 = Button('Lock',200, 50,(480, 530),5)
-button5 = Button('Heal',140, 30,(480, 600),5)
+button5 = Button('Heal',90, 90,(490, 590),5)
 
 btns = [button1, button2, button3, button4, button5]
-potion_count = 2
-enemy_potion_count = 2 
+potion_count = 3
+enemy_potion_count = 3 
 
+got_bonus = False 
 game_paused = False    
 energy_attack_ready = False 
-enemy_energy_attack_ready = False 
+enemy_energy_attack_ready = False   
 
 pygame.mixer.init()
 
@@ -45,11 +46,41 @@ pygame.mixer.init()
 def get_font(size): # Returns Press-Start-2P in the desired size
     return pygame.font.Font("assets/font.ttf", size)
 
+
+# Reset all variables in the game. 
+def reset_game(champion_zero, champion_one, my_sound, game_obj):
+    global game_paused
+    global potion_count
+    global enemy_potion_count
+    global energy_attack_ready
+    global enemy_energy_attack_ready
+    global got_bonus 
+
+    my_sound.stop()
+    potion_count = 3
+    got_bonus = False 
+    game_paused = False 
+    start_loading_screen()
+    enemy_potion_count = 3
+    game_obj.reset_buttons() 
+    champion_one.reseT_energy()
+    energy_attack_ready = False 
+    champion_zero.reseT_energy()
+    enemy_energy_attack_ready = False   
+
 '''
 Use redraw_win to clean the main while loop on man_menu_x
 '''
 def redraw_win(SCREEN, BG, BOX, time, MENU_TEXT, MENU_RECT, moving_sprites, btns, game_buttons, MENU_MOUSE_POS, PAUSE_MENU, pause_menu_buttons):
     global game_paused
+    global got_bonus 
+
+    if got_bonus:
+        bonus = get_font(10).render( str(f"Arena Bonus: +5"), True, (255, 0, 0)) 
+        SCREEN.blit(bonus, (120, 270))
+    else:
+        bonus = get_font(10).render( str(f"Arena Bonus: 0"), True, (255, 0, 0)) 
+        SCREEN.blit(bonus, (120, 270))
 
     if game_paused:
         SCREEN.blit(BG, (0, 0))
@@ -96,8 +127,9 @@ def settigns_state(comand):
     elif comand == "inactive":
         game_paused = False
 
-def main_menu_x(pl):
+def start_offline_game(pl):
     global clock
+    global got_bonus
     global game_paused 
     global potion_count 
     global enemy_potion_count
@@ -126,18 +158,20 @@ def main_menu_x(pl):
     start_ticks = pygame.time.get_ticks() # Let pygame count the ticks for time 
     minutes_played = 0 
 
-    # ------ Add Bonus to champions -----------
+
     arena_type = random.choice(arenas) 
 
+    # ------ Add Bonus to champions -----------
     if arena_type == champion_zero.element: 
-        champion_zero.attack_damage += 3
+        champion_zero.attack_damage += 50
+        got_bonus = True 
     if arena_type == champion_one.element: 
-        champion_one.attack_damage += 3
+        champion_one.attack_damage += 50
     # ----- Nerf champions based on the openent ---------------
     if champion_one.element == champion_zero.weakness:
-        champion_zero.attack_damage -= 3
+        champion_zero.attack_damage -= 30
     if champion_zero.element == champion_one.weakness:
-        champion_zero.attack_damage -= 3
+        champion_zero.attack_damage -= 30
 
     # Objects that will be shown on the screen 
     BG = pygame.transform.scale(pygame.image.load(f"assets/arenas/{arena_type}_arena.png").convert_alpha(), (1200, 720))
@@ -146,11 +180,11 @@ def main_menu_x(pl):
     MENU_TEXT = get_font(37).render(f"{champion_zero.name}    vs    {champion_one.name}", True, "#FF421A")
     MENU_RECT = MENU_TEXT.get_rect(center=(600, 50))
 
-
     # Start the idle before the loop so it doesn't block the updates 
     champion_zero.start_idle()
     champion_one.start_idle()
-    while True:
+    run = True 
+    while run:
         clock.tick(30)  
         # Get the seconds within the gaem and blit the on the screen 
         seconds = int((pygame.time.get_ticks()-start_ticks)/1000) #calculate how many seconds
@@ -183,8 +217,8 @@ def main_menu_x(pl):
         SCISSORS_BUTTON = BaseButton(image=None, pos=(340, 640), 
                             text_input="Scissors", font=get_font(25), base_color="#11FF00", hovering_color="#BCFDB7")
 
-        HEAL_BUTTON = BaseButton(image=None, pos=(555, 610), 
-                            text_input="Heal", font=get_font(25), base_color="#11FF00", hovering_color="#BCFDB7")
+        HEAL_BUTTON = BaseButton(image=pygame.transform.scale(pygame.image.load("assets/healing_potion.png").convert_alpha(), (90,90)), pos=(535, 630), 
+                            text_input=" ", font=get_font(25), base_color="#11FF00", hovering_color="#BCFDB7")
 
         LOCK_BUTTON = BaseButton(image=None, pos=(578, 550), 
                             text_input="LOCK MOVE", font=get_font(20), base_color="#11FF00", hovering_color="#BCFDB7")
@@ -208,22 +242,18 @@ def main_menu_x(pl):
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                reset_game(champion_zero, champion_one, my_sound, game_obj)
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN and game_obj.game_buttons_locked == False:
                 if QUIT_GAME_BUTTON.checkForInput(MENU_MOUSE_POS) and game_paused:
-                    game_obj.reset_buttons() 
-                    start_loading_screen()
-                    potion_count = 2 
-                    game_paused = False 
-                    my_sound.stop() 
+                    reset_game(champion_zero, champion_one, my_sound, game_obj)
                     return False 
 
                 # Let the player heal if there are enough potions left 
                 if HEAL_BUTTON.checkForInput(MENU_MOUSE_POS) and not game_obj.player_played: 
                     if potion_count > 0:
                         champion_zero.get_health(100)
-                        champion_zero.heal_self(can_heal=True)     
                         potion_count -= 1              
                     for btn in btns:
                         if btn != button2:
@@ -301,6 +331,17 @@ def main_menu_x(pl):
                     run = False
                     sys.exit()
                 
+                # Check when the energy is maxed so the ultimate attack can be activated 
+                if champion_zero.energy >= 1000:
+                    energy_attack_ready = True 
+                else:
+                    energy_attack_ready = False 
+
+                if champion_one.energy >= 1000:
+                    enemy_energy_attack_ready = True 
+                else:
+                    enemy_energy_attack_ready = False 
+
                 # ----------------------------  Animation Logic --------------------------------------
                 if game_obj.both_played():
                     outcome = game_obj.winner_who(game_obj.player_move[0], game_obj.enemy_move[0])
@@ -310,14 +351,14 @@ def main_menu_x(pl):
                         SCREEN.blit(result, (120, 270))
                         pygame.display.update()
                         pygame.time.delay(2000)
-                        #  CDepending on the collected energy, start ult attack animation or a normal one  
+                        #  Depending on the collected energy, start ult attack animation or a normal one  
                         if energy_attack_ready:
                             game_obj.pla_att_anim()
                             moving_sprites.empty()  
                             moving_sprites.add(champion_one, champion_zero)  
                             champion_zero.start_running_with_ult() # Start the animation for attack 
                         else:
-                            champion_zero.get_energy(100) 
+                            champion_zero.get_energy(200) 
                             game_obj.pla_att_anim()
                             moving_sprites.empty() 
                             moving_sprites.add(champion_one, champion_zero)  
@@ -335,7 +376,7 @@ def main_menu_x(pl):
                             champion_one.start_running_with_ult() # Start the animation for attack 
                         else:
                             #  Depending on the collected energy, start ult attack animation or a normal one  
-                            champion_one.get_energy(100)         
+                            champion_one.get_energy(200)    
                             game_obj.pla_att_anim()
                             moving_sprites.empty()  
                             moving_sprites.add(champion_zero, champion_one)  
@@ -352,78 +393,69 @@ def main_menu_x(pl):
 
                     game_obj.reset_moves()
 
-        if champion_zero.energy >= 1000:
-            energy_attack_ready = True 
-
-        if champion_one.energy >= 1000:
-            enemy_energy_attack_ready = True 
-
-
+        # Once the attack animation is done and the champion returns to the original position, unlock the buttons 
         if move_list and champion_one.attack_done == True:
             game_obj.reset_buttons() 
             move_list.clear()
             for btn in btns:
                 btn.is_locked = False 
-
-        if move_list and champion_zero.attack_done == True:
+        elif move_list and champion_zero.attack_done == True:
             game_obj.reset_buttons() 
             move_list.clear() 
             for btn in btns:
                 btn.is_locked = False 
 
+        # when the player champion reaches the enemy champion and the attach animation is over, apply damage 
         if game_obj.attack_anim and champion_zero.rect.center[0] >= 790:
-            champion_one.health -= 12 
-            champion_one.get_damage(120)
+            champion_one.get_damage(champion_zero.attack_damage )
             game_obj.sto_att_anim() 
 
-        if game_obj.attack_anim and champion_one.rect.center[0] <= 280:
-            champion_zero.health -= 12
-            champion_zero.get_damage(120)
+        # when the enemy reaches the players champion and the attach animation is over, apply damage 
+        if game_obj.attack_anim and champion_one.rect.center[0] <= 300:
+            champion_zero.get_damage(champion_one.attack_damage)
             game_obj.sto_att_anim()
 
-
+        # Check when the enemy rectangle reaches the attach point and activate the hit animation 
+        # TODO: Fix the rectangle colision detection to avoid the extra il/elif lines 
         if game_obj.attack_anim and champion_one.rect.center[0] <= 330:
             champion_zero.start_hit_anim() 
-            
+
+        # Check when the players champion rectangle reaches the attach point and activate the hit animation 
         if game_obj.attack_anim and champion_zero.rect.center[0] >= 770:
             champion_one.start_hit_anim() 
 
+        # Let the enemy heal himself
+        if champion_one.target_health <= 500 and enemy_potion_count > 0:
+            enemy_potion_count -= 1
+            champion_one.get_health(100)
 
-        if champion_one.health <= 50 and enemy_potion_count > 0:
+        if champion_one.target_health <= 50 and enemy_potion_count > 0:
             champion_one.health += 10
             enemy_potion_count -= 1
 
         # Ending if enemy looses. Reset everything in the game
-        if champion_one.health <= 0: 
+        if champion_one.target_health <= 0:
             result = result_font.render( str(f"{champion_zero.name} won the round!"), True, (255, 0, 0)) 
             SCREEN.blit(result, (120, 270))
             pygame.display.update()
             pygame.time.delay(2000)
-            my_sound.stop() 
-            game_obj.reset_buttons() 
-            start_loading_screen()
-            potion_count = 2
-            enemy_potion_count = 2
-            game_paused = False 
+            reset_game(champion_zero, champion_one, my_sound, game_obj)
             return False
         
         # Ending if player looses. Reset everything in the game
-        if champion_zero.health <= 0:
+        if champion_zero.target_health <= 0:
             result = result_font.render( str(f"{champion_one.name} won the round!"), True, (255, 0, 0)) 
             SCREEN.blit(result, (120, 270))
             pygame.display.update()
             pygame.time.delay(2000)
             champion_zero.start_death_animation()  # TODO: Fix the death animation so that it show in the end of the game. 
-            my_sound.stop()
-            game_obj.reset_buttons() 
-            start_loading_screen()
-            potion_count = 2 
-            enemy_potion_count = 2
-            game_paused = False 
+            # Reset everything in the game 
+            reset_game(champion_zero, champion_one, my_sound, game_obj)
             return False
 
         # Keep update in the end so there are no speed gliches 
         champion_zero.update()
         champion_one.update()
         pygame.display.flip()
+	
 
