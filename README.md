@@ -2,6 +2,9 @@
 RockPaperFight is a simple Rock Paper Scissors game made with PyGame 
 
 INSTRUCTIONS: 
+Open the client file in your IDE
+* pip install pygame
+* pip install requests
 
 For multiplayer:  
 
